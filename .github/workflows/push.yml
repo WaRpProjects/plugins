@@ -12,8 +12,9 @@ jobs:
 
       - name: Prepare bootstrap files
         run: |
-          touch plugins.json
           mkdir release
+          git clone https://github.com/unethicalite/unethicalite-plugins-release.git deploy
+          cp ./deploy/plugins.json .
 
       - name: Make gradlew executable
         run: chmod +x ./gradlew
@@ -23,7 +24,6 @@ jobs:
 
       - name: Push to release branch
         run: |
-          git clone https://github.com/unethicalite/unethicalite-plugins-release.git deploy
           cp -r ./release/. ./deploy
           cp plugins.json deploy
           cd deploy

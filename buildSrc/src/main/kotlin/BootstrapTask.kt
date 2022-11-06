@@ -1,15 +1,14 @@
+import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.savvasdalkitsis.jsonmerger.JsonMerger
-import okhttp3.Call
-import okhttp3.Callback
-import okhttp3.OkHttpClient
-import okhttp3.Request
 import org.gradle.api.DefaultTask
 import org.gradle.api.tasks.TaskAction
 import org.gradle.kotlin.dsl.extra
 import org.gradle.kotlin.dsl.get
-import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import java.io.FileReader
+import java.io.FileWriter
 import java.nio.file.Paths
 import java.security.MessageDigest
 import java.text.SimpleDateFormat
@@ -24,16 +23,11 @@ open class BootstrapTask : DefaultTask() {
 
     private fun hash(file: ByteArray): String {
         return MessageDigest.getInstance("SHA-512").digest(file).fold("", { str, it -> str + "%02x".format(it) })
-            .toUpperCase()
+                .toUpperCase()
     }
 
-    private fun getBootstrap(filename: String): JSONArray? {
-        val bootstrapFile = File(filename).readText()
-        if (bootstrapFile.isBlank()) {
-            return JSONArray()
-        }
-
-        return JSONObject("{\"plugins\":$bootstrapFile}").getJSONArray("plugins")
+    private fun getBootstrap(filename: String): MutableList<Bootstrap> {
+        return FileReader(filename).use { Gson().fromJson(it, Array<Bootstrap>::class.java).toMutableList() }
     }
 
     @TaskAction
@@ -44,82 +38,72 @@ open class BootstrapTask : DefaultTask() {
 
             bootstrapReleaseDir.mkdirs()
 
-            val plugins = ArrayList<JSONObject>()
-            val baseBootstrap = getBootstrap("$bootstrapDir/plugins.json")
-                ?: throw RuntimeException("Base bootstrap is null!")
+            val bootstrapMap = getBootstrap("$bootstrapDir/plugins.json")
+                    .associateBy { it.id }
+                    .toMutableMap()
 
             project.subprojects.forEach {
                 if (it.project.properties.containsKey("PluginName") && it.project.properties.containsKey("PluginDescription")) {
-                    var pluginAdded = false
-                    val plugin = it.project.tasks["jar"].outputs.files.singleFile
+                    val pluginFile = it.project.tasks["jar"].outputs.files.singleFile
 
-                    val releases = ArrayList<JsonBuilder>()
-
-                    val sha512 = hash(plugin.readBytes())
-                    releases.add(
-                        JsonBuilder(
-                            "version" to it.project.version,
-                            "requires" to ProjectVersions.apiVersion,
-                            "date" to formatDate(Date()),
-                            "url" to "https://raw.githubusercontent.com/${project.rootProject.extra.get("GithubUserName")}/${
+                    val sha512 = hash(pluginFile.readBytes())
+                    val release = Bootstrap.Release(
+                            version = it.project.version as String,
+                            requires = ProjectVersions.apiVersion,
+                            date = formatDate(Date()),
+                            url = "https://raw.githubusercontent.com/${project.rootProject.extra.get("GithubUserName")}/${
                                 project.rootProject.extra.get(
-                                    "GithubRepoName"
+                                        "GithubRepoName"
                                 )
                             }/master/${it.project.name}-${it.project.version}.jar",
-                            "sha512sum" to sha512
-                        )
+                            sha512sum = sha512
                     )
 
-                    val pluginObject = JsonBuilder(
-                        "name" to it.project.extra.get("PluginName"),
-                        "id" to nameToId(it.project.extra.get("PluginName") as String),
-                        "description" to it.project.extra.get("PluginDescription"),
-                        "provider" to it.project.extra.get("PluginProvider"),
-                        "projectUrl" to it.project.extra.get("ProjectSupportUrl"),
-                        "releases" to releases.toTypedArray()
-                    ).jsonObject()
-
-                    for (i in 0 until baseBootstrap.length()) {
-                        val item = baseBootstrap.getJSONObject(i)
-
-                        if (item.get("id") != nameToId(it.project.extra.get("PluginName") as String)) {
-                            continue
+                    val id = nameToId(it.project.extra.get("PluginName") as String)
+                    val existingBootstrap = bootstrapMap[id]
+                    if (existingBootstrap != null) {
+                        val existingRelease = existingBootstrap.releases.firstOrNull { it.version == release.version }
+                        if (existingRelease != null) {
+                            existingBootstrap.releases.set(existingBootstrap.releases.indexOf(existingRelease), release)
+                        } else {
+                            existingBootstrap.releases.add(release)
                         }
-
-                        val itemReleases = item.getJSONArray("releases")
-                        if (it.project.version.toString() in itemReleases.toString()) {
-                            val last = itemReleases.get(itemReleases.length() - 1) as JSONObject
-                            last.put("sha512sum", sha512)
-                            plugins.add(item)
-                            pluginAdded = true
-                            break
-                        }
-
-                        plugins.add(JsonMerger(arrayMergeMode = JsonMerger.ArrayMergeMode.MERGE_ARRAY).merge(item, pluginObject))
-                        pluginAdded = true
+                    } else {
+                        bootstrapMap[id] = Bootstrap(
+                                name = it.project.extra.get("PluginName") as String,
+                                id = id,
+                                description = it.project.extra.get("PluginDescription") as String,
+                                provider = it.project.extra.get("PluginProvider") as String,
+                                projectUrl = it.project.extra.get("ProjectSupportUrl") as String,
+                                releases = mutableListOf(release)
+                        )
                     }
 
-                    if (!pluginAdded)
-                    {
-                        plugins.add(pluginObject)
-                    }
-
-                    plugin.copyTo(
-                        Paths.get(bootstrapReleaseDir.toString(), "${it.project.name}-${it.project.version}.jar").toFile(),
-                        overwrite = true
+                    pluginFile.copyTo(
+                            Paths.get(bootstrapReleaseDir.toString(), "${it.project.name}-${it.project.version}.jar").toFile(),
+                            overwrite = true
                     )
                 }
             }
 
-            val pluginsOut = ArrayList<String>()
-            for (json in plugins) {
-                pluginsOut.add(json.toString(2))
-            }
-
-            File(bootstrapDir, "plugins.json").printWriter().use { out ->
-                out.println(pluginsOut.toString())
-            }
+            FileWriter("$bootstrapDir/plugins.json").use { GsonBuilder().setPrettyPrinting().create().toJson(bootstrapMap.values, it) }
         }
+    }
 
+    data class Bootstrap(
+            val projectUrl: String,
+            val provider: String,
+            val name: String,
+            val description: String,
+            val id: String,
+            val releases: MutableList<Release>
+    ) {
+        data class Release(
+                val date: String,
+                val sha512sum: String,
+                val version: String,
+                val url: String,
+                val requires: String
+        )
     }
 }

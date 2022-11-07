@@ -25,3 +25,8 @@ replay_pid*
 release
 plugins.json
 test
+buildSrc
+.github/workflows
+gradle/wrapper
+config/checkstyle
+*gradle*

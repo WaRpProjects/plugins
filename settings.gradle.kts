@@ -23,10 +23,11 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-rootProject.name = "unethicalite-plugins"
+rootProject.name = "UnethicalPlugins"
 
 include("warpcutter")
 include("warpgauntlet")
+include("warpskiller")
 
 for (project in rootProject.children) {
     project.apply {

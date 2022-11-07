@@ -4,23 +4,27 @@ import com.google.inject.Inject;
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
+import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ProjectileSpawned;
+import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.unethicalite.api.entities.NPCs;
 import net.unethicalite.api.game.Combat;
+import net.unethicalite.api.interaction.InteractMethod;
 import net.unethicalite.api.items.Equipment;
 import net.unethicalite.api.items.Inventory;
 import net.unethicalite.api.plugins.LoopedPlugin;
 import net.unethicalite.api.widgets.Prayers;
+import net.unethicalite.api.widgets.Widgets;
 import org.pf4j.Extension;
 
 import java.util.Set;
 
 @PluginDescriptor(
-        name = "WaRp Gauntlet Swapper",
-        description = "Swaps prayer and weapon in Gauntlet fight",
+        name = "WaRp Hunlef Swapper",
+        description = "Swaps prayer and weapons in the hunlef fight",
         enabledByDefault = false
 )
 
@@ -56,64 +60,22 @@ public class WarpGauntletPlugin extends LoopedPlugin
     private Client client;
 
     @Subscribe
-    private void onProjectileSpawned (ProjectileSpawned projectileSpawned)
+    private void onGameTick (GameTick gameTick)
     {
-        if (isHunllefVarbitSet())
-        {
-            Projectile projectile = projectileSpawned.getProjectile();
-            if (magicAttackID.contains(projectile.getId()))
-            {
-                log.debug("Magic attack");
-                if (!Prayers.isEnabled(Prayer.PROTECT_FROM_MAGIC))
-                {
-                    Prayers.toggle(Prayer.PROTECT_FROM_MAGIC);
-                }
-            }
 
-            if (rangeAttackID.contains(projectile.getId()))
-            {
-                log.debug("Range attack");
-                if (!Prayers.isEnabled(Prayer.PROTECT_FROM_MISSILES))
-                {
-                    Prayers.toggle(Prayer.PROTECT_FROM_MISSILES);
-                }
-            }
-        }
-    }
-
-    @Override
-    protected int loop()
-    {
         if (isHunllefVarbitSet())
         {
             Item staff = Inventory.getFirst(staffID);
             Item bow = Inventory.getFirst(bowID);
-            Item potion = Inventory.getFirst(potionID);
-            Item food = Inventory.getFirst(23874);
-
             hunlef = NPCs.getNearest(hunlefID);
-
-            if (config.eat() && Combat.getHealthPercent() <= config.healthPercent())
-            {
-
-                food.interact("Eat");
-                return 323;
-            }
-
-            if (Prayers.getPoints() <= 27)
-            {
-                potion.interact("Drink");
-                return 323;
-            }
-
             if (hunlef.getTransformedComposition().getOverheadIcon() == HeadIcon.MAGIC && !Equipment.contains(bowID))
             {
                 log.debug("Magic overhead");
                 if (bow != null)
                 {
                     log.debug("equiping Bow");
-                    bow.interact("Wield");
-                    return 323;
+                    bow.interact(InteractMethod.PACKETS, "Wield");
+                    hunlef.interact(InteractMethod.PACKETS, "Attack");
                 }
 
             }
@@ -124,25 +86,87 @@ public class WarpGauntletPlugin extends LoopedPlugin
                 if (staff != null)
                 {
                     log.debug("equiping Staff");
-                    staff.interact("Wield");
-                    return 343;
+                    staff.interact(InteractMethod.PACKETS, "Wield");
+                    hunlef.interact(InteractMethod.PACKETS, "Attack");
                 }
 
+            }
+        }
+    }
+
+    @Subscribe
+    private void onProjectileSpawned (ProjectileSpawned projectileSpawned)
+    {
+
+        if (isHunllefVarbitSet())
+        {
+
+            Projectile projectile = projectileSpawned.getProjectile();
+            if (magicAttackID.contains(projectile.getId()))
+            {
+                log.debug("Magic attack");
+                if (!Prayers.isEnabled(Prayer.PROTECT_FROM_MAGIC))
+                {
+                    togglePrayer(Prayer.PROTECT_FROM_MAGIC);
+                }
+            }
+
+            if (rangeAttackID.contains(projectile.getId()))
+            {
+                log.debug("Range attack");
+                if (!Prayers.isEnabled(Prayer.PROTECT_FROM_MISSILES))
+                {
+                    togglePrayer(Prayer.PROTECT_FROM_MISSILES);
+                }
+            }
+        }
+    }
+
+    @Override
+    protected int loop()
+    {
+        if (isHunllefVarbitSet())
+        {
+            Item potion = Inventory.getFirst(potionID);
+            Item food = Inventory.getFirst(23874);
+
+            if (config.eat() && Combat.getHealthPercent() <= config.healthPercent())
+            {
+
+                food.interact(InteractMethod.PACKETS, "Eat");
+                hunlef.interact(InteractMethod.PACKETS, "Attack");
+                return 400;
+            }
+
+            if (Prayers.getPoints() <= 27)
+            {
+                potion.interact(InteractMethod.PACKETS, "Drink");
+                hunlef.interact(InteractMethod.PACKETS, "Attack");
+                return 400;
             }
 
             if (Equipment.contains(bowID) && !Prayers.isEnabled(config.offencePrayerRange().getPrayer()))
             {
-                Prayers.toggle(config.offencePrayerRange().getPrayer());
-                return 234;
+                togglePrayer(config.offencePrayerRange().getPrayer());
+                return 400;
             }
 
             if (Equipment.contains(staffID) && !Prayers.isEnabled(config.offencePrayerMage().getPrayer()))
             {
-                Prayers.toggle(config.offencePrayerMage().getPrayer());
-                return 125;
+                togglePrayer(config.offencePrayerMage().getPrayer());
+                return 400;
             }
         }
-        return 323;
+        return 400;
+    }
+
+    private void togglePrayer(Prayer prayer)
+    {
+        Widget widget = Widgets.get(prayer.getWidgetInfo());
+        if (widget != null)
+        {
+            widget.interact(InteractMethod.PACKETS, 0);
+        }
     }
 
 

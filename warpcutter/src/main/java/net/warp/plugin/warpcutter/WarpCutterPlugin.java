@@ -70,6 +70,7 @@ public class WarpCutterPlugin extends LoopedPlugin
 
         if (Players.getLocal().isAnimating() || Players.getLocal().isMoving())
         {
+
             return 400;
         }
 

@@ -13,16 +13,16 @@ plugins {
     kotlin("jvm") version "1.6.21"
 }
 
-project.extra["GithubUrl"] = "https://github.com/unethicalite/unethicalite-plugins-release"
-project.extra["GithubUserName"] = "unethicalite"
-project.extra["GithubRepoName"] = "unethicalite-plugins-release"
+project.extra["GithubUrl"] = "https://github.com/WaRpProjects/UnethicalPlugins"
+project.extra["GithubUserName"] = "WaRpProjects"
+project.extra["GithubRepoName"] = "UnethicalPlugins"
 
 apply<BootstrapPlugin>()
 
 allprojects {
-    group = "net.unethicalite"
+    group = "net.warp"
 
-    project.extra["PluginProvider"] = "unethicalite"
+    project.extra["PluginProvider"] = "Warp"
     project.extra["ProjectSupportUrl"] = "https://discord.gg/WTvTbSPknJ"
     project.extra["PluginLicense"] = "3-Clause BSD License"
 

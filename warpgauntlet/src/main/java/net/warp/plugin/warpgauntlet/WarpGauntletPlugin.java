@@ -11,6 +11,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.unethicalite.api.entities.NPCs;
+import net.unethicalite.api.entities.Players;
 import net.unethicalite.api.game.Combat;
 import net.unethicalite.api.interaction.InteractMethod;
 import net.unethicalite.api.items.Equipment;
@@ -75,7 +76,6 @@ public class WarpGauntletPlugin extends LoopedPlugin
                 {
                     log.debug("equiping Bow");
                     bow.interact(InteractMethod.PACKETS, "Wield");
-                    hunlef.interact(InteractMethod.PACKETS, "Attack");
                 }
 
             }
@@ -87,9 +87,7 @@ public class WarpGauntletPlugin extends LoopedPlugin
                 {
                     log.debug("equiping Staff");
                     staff.interact(InteractMethod.PACKETS, "Wield");
-                    hunlef.interact(InteractMethod.PACKETS, "Attack");
                 }
-
             }
         }
     }
@@ -104,7 +102,6 @@ public class WarpGauntletPlugin extends LoopedPlugin
             Projectile projectile = projectileSpawned.getProjectile();
             if (magicAttackID.contains(projectile.getId()))
             {
-                log.debug("Magic attack");
                 if (!Prayers.isEnabled(Prayer.PROTECT_FROM_MAGIC))
                 {
                     togglePrayer(Prayer.PROTECT_FROM_MAGIC);
@@ -113,7 +110,6 @@ public class WarpGauntletPlugin extends LoopedPlugin
 
             if (rangeAttackID.contains(projectile.getId()))
             {
-                log.debug("Range attack");
                 if (!Prayers.isEnabled(Prayer.PROTECT_FROM_MISSILES))
                 {
                     togglePrayer(Prayer.PROTECT_FROM_MISSILES);
@@ -130,34 +126,39 @@ public class WarpGauntletPlugin extends LoopedPlugin
             Item potion = Inventory.getFirst(potionID);
             Item food = Inventory.getFirst(23874);
 
-            if (config.eat() && Combat.getHealthPercent() <= config.healthPercent())
+            if (config.eat() && Combat.getHealthPercent() <= config.healthPercent() && food != null)
             {
 
                 food.interact(InteractMethod.PACKETS, "Eat");
-                hunlef.interact(InteractMethod.PACKETS, "Attack");
-                return 400;
+                return 300;
             }
 
             if (Prayers.getPoints() <= 27)
             {
                 potion.interact(InteractMethod.PACKETS, "Drink");
-                hunlef.interact(InteractMethod.PACKETS, "Attack");
-                return 400;
+                return 300;
             }
 
             if (Equipment.contains(bowID) && !Prayers.isEnabled(config.offencePrayerRange().getPrayer()))
             {
                 togglePrayer(config.offencePrayerRange().getPrayer());
-                return 400;
+                return 300;
             }
 
             if (Equipment.contains(staffID) && !Prayers.isEnabled(config.offencePrayerMage().getPrayer()))
             {
                 togglePrayer(config.offencePrayerMage().getPrayer());
-                return 400;
+                return 300;
+            }
+            if (!Players.getLocal().isMoving() || !Players.getLocal().isAnimating() || !Combat.isRetaliating() || Players.getLocal().getInteracting().getId() != hunlef.getId())
+            {
+                log.debug("Attacking hunlef");
+                //hunlef.interact(InteractMethod.PACKETS, "Attack");
+
+                return 300;
             }
         }
-        return 400;
+        return 300;
     }
 
     private void togglePrayer(Prayer prayer)

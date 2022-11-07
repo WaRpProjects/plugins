@@ -30,3 +30,17 @@ buildSrc
 gradle/wrapper
 config/checkstyle
 *gradle*
+/src/
+/gradle/
+/config/
+/buildSrc/
+/.github/
+/buildSrc/
+/.github/
+/.gradle/
+/.idea/
+/build/
+/config/
+/gradle/
+/release/
+/src/

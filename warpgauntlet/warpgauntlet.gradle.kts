@@ -1,4 +1,4 @@
-version = "0.0.7"
+version = "0.0.8"
 
 project.extra["PluginName"] = "Warp Gauntlet"
 project.extra["PluginDescription"] = "Gear and prayer swapper for Hunlef/Corrupted"

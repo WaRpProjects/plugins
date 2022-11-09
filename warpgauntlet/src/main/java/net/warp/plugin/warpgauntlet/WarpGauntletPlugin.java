@@ -42,7 +42,7 @@ public class WarpGauntletPlugin extends LoopedPlugin
     * Prayer flick
     * Add Demi Bosses
     */
-    private static final Set<Integer> magicAttackID = Set.of(1706, 1707);
+    private static final Set<Integer> magicAttackID = Set.of(1706, 1707, 1708);
 
     private static final Set<Integer> rangeAttackID = Set.of(1711, 1712);
 

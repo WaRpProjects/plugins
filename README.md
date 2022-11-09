@@ -7,11 +7,10 @@ For suggestions or features/bugs contact WaRp#9721
 
 	* WarpGauntlet - Swaps Weapons and prayer in the hunlef fight Eats and drinks as well.
 
-	* WarpSkiller - Coming soon.
+	* WarpSkiller - Does Gem cutting, High alch, Low alch, Superheat for now more to come.
 	
-	* WarpGorilla - Coming soon.
-	
-	* WarpFisher - Coming soon.
+	* WarpMasterThieving - Draynor Masterfarmer robber. Support eating and banking/dropping.
+
 
 How to add:
 
@@ -20,7 +19,7 @@ How to add:
 	Repository name: UnethicalPlugins
 
 Source code:
-	https://github.com/WaRpProjects/plugins
+https://github.com/WaRpProjects/plugins
 
 
 Got more plugins in the work

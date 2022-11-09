@@ -1,11 +1,40 @@
 package net.warp.plugin.warpskiller;
 
-import net.unethicalite.api.plugins.LoopedPlugin;
+import com.google.inject.Inject;
+import com.google.inject.Provides;
+import lombok.extern.slf4j.Slf4j;
+import net.runelite.client.config.ConfigManager;
+import net.runelite.client.plugins.PluginDescriptor;
+import net.unethicalite.api.plugins.Task;
+import net.unethicalite.api.plugins.TaskPlugin;
+import net.warp.plugin.warpskiller.Tasks.*;
 
-public class WarpSkillerPlugin extends LoopedPlugin {
+import org.pf4j.Extension;
+
+@PluginDescriptor(
+        name = "WaRp Skiller",
+        description = "Skills at GE.",
+        enabledByDefault = false
+)
+
+@Slf4j
+@Extension
+public class WarpSkillerPlugin extends TaskPlugin {
+    @Provides
+    WarpSkillerConfig provideConfig(ConfigManager configManager)
+    {
+        return configManager.getConfig(WarpSkillerConfig.class);
+    }
+
+    public final int[] bankNPCID = {1613, 1633, 1634, 3089};
+
+    @Inject
+    public WarpSkillerConfig config;
+    private final Task[] taskList = {  new AlchTask(this), new FletchTask(this) , new GemTask(this) };
 
     @Override
-    protected int loop() {
-        return 0;
+    public Task[] getTasks() {
+        return taskList;
     }
+
 }

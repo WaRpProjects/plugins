@@ -4,21 +4,14 @@ import lombok.Getter;
 
 @Getter
 public enum SkillTask {
-    FLETCH("Fletch", 1232),
-    CRUSH("Crush", 343, "Pestle and mortar"),
-    ALCH("Alch", 2102),
-    STRING("String bow", 1000),
-    SMELT("Smelt", 2000, "Cannon"),
-    SMITH("Smith", 2000, "Hammer");
+    CRAFT("Craft"),
+    FLETCH("Fletch"),
+    MAGIC("Magic");
 
     private final String taskName;
-    private final int sleep;
-    private final String itemName;
-    SkillTask(String taskName, int sleep, String... itemName)
+    SkillTask(String taskName)
     {
         this.taskName = taskName;
-        this.sleep = sleep;
-        this.itemName = String.valueOf(itemName);
     }
 
 }

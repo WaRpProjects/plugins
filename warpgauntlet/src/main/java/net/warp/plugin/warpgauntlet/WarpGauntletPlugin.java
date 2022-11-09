@@ -6,12 +6,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.GameTick;
 import net.runelite.api.events.ProjectileSpawned;
+import net.runelite.api.events.VarbitChanged;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.unethicalite.api.entities.NPCs;
-import net.unethicalite.api.entities.Players;
 import net.unethicalite.api.game.Combat;
 import net.unethicalite.api.interaction.InteractMethod;
 import net.unethicalite.api.items.Equipment;
@@ -34,6 +34,14 @@ import java.util.Set;
 public class WarpGauntletPlugin extends LoopedPlugin
 {
 
+    /*
+    ToDo:
+    * Add Corrupted ID's
+    * Find a way to see if i can auto attack
+    * Add Prayer pot to Config
+    * Prayer flick
+    * Add Demi Bosses
+    */
     private static final Set<Integer> magicAttackID = Set.of(1706, 1707);
 
     private static final Set<Integer> rangeAttackID = Set.of(1711, 1712);
@@ -61,9 +69,20 @@ public class WarpGauntletPlugin extends LoopedPlugin
     private Client client;
 
     @Subscribe
+    private void onVarbitChanged (VarbitChanged varbitChanged)
+    {
+        if (varbitChanged.getVarbitId() == 9177)
+        {
+            if (isHunllefVarbitSet() && !Prayers.isEnabled(Prayer.PROTECT_FROM_MISSILES))
+            {
+                togglePrayer(Prayer.PROTECT_FROM_MISSILES);
+            }
+        }
+    }
+
+    @Subscribe
     private void onGameTick (GameTick gameTick)
     {
-
         if (isHunllefVarbitSet())
         {
             Item staff = Inventory.getFirst(staffID);
@@ -77,7 +96,6 @@ public class WarpGauntletPlugin extends LoopedPlugin
                     log.debug("equiping Bow");
                     bow.interact(InteractMethod.PACKETS, "Wield");
                 }
-
             }
 
             if (hunlef.getTransformedComposition().getOverheadIcon() == HeadIcon.RANGED && !Equipment.contains(staffID))
@@ -95,7 +113,6 @@ public class WarpGauntletPlugin extends LoopedPlugin
     @Subscribe
     private void onProjectileSpawned (ProjectileSpawned projectileSpawned)
     {
-
         if (isHunllefVarbitSet())
         {
 
@@ -107,7 +124,6 @@ public class WarpGauntletPlugin extends LoopedPlugin
                     togglePrayer(Prayer.PROTECT_FROM_MAGIC);
                 }
             }
-
             if (rangeAttackID.contains(projectile.getId()))
             {
                 if (!Prayers.isEnabled(Prayer.PROTECT_FROM_MISSILES))
@@ -132,35 +148,24 @@ public class WarpGauntletPlugin extends LoopedPlugin
                 food.interact(InteractMethod.PACKETS, "Eat");
                 return 300;
             }
-
             if (Prayers.getPoints() <= 27)
             {
                 potion.interact(InteractMethod.PACKETS, "Drink");
                 return 300;
             }
-
             if (Equipment.contains(bowID) && !Prayers.isEnabled(config.offencePrayerRange().getPrayer()))
             {
                 togglePrayer(config.offencePrayerRange().getPrayer());
                 return 300;
             }
-
             if (Equipment.contains(staffID) && !Prayers.isEnabled(config.offencePrayerMage().getPrayer()))
             {
                 togglePrayer(config.offencePrayerMage().getPrayer());
                 return 300;
             }
-            if (!Players.getLocal().isMoving() || !Players.getLocal().isAnimating() || !Combat.isRetaliating() || Players.getLocal().getInteracting().getId() != hunlef.getId())
-            {
-                log.debug("Attacking hunlef");
-                //hunlef.interact(InteractMethod.PACKETS, "Attack");
-
-                return 300;
-            }
         }
         return 300;
     }
-
     private void togglePrayer(Prayer prayer)
     {
         Widget widget = Widgets.get(prayer.getWidgetInfo());
@@ -169,9 +174,6 @@ public class WarpGauntletPlugin extends LoopedPlugin
             widget.interact(InteractMethod.PACKETS, 0);
         }
     }
-
-
-
     private boolean isGauntletVarbitSet()
     {
         return client.getVar(9178) == 1;

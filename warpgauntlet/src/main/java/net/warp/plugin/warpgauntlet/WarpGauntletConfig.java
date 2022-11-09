@@ -32,12 +32,35 @@ public interface WarpGauntletConfig extends Config
     }
 
     @ConfigItem(
+            keyName = "drinkPot",
+            name = "Drink Egniol",
+            description = "Drink Egniol pots",
+            position = 2
+    )
+    default boolean drinkPot() { return true; }
+
+    @ConfigItem(
+            keyName = "prayerPoints",
+            name = "When to drink Egniol",
+            description = "When to drink Egniol potion",
+            position = 3
+    )
+    default int prayerPoints() { return 28; }
+
+    @ConfigItem(
+            keyName = "swapWeapon",
+            name = "Swap weapons",
+            description = "Swap weapons",
+            position = 4
+    )
+    default boolean swapWeapon() { return true; }
+
+    @ConfigItem(
             keyName = "offencePrayerRange",
             name = "Range prayer",
             description = "What offence range prayer to use",
-            position = 2
+            position = 5
     )
-
     default OffenceRange offencePrayerRange()
     {
         return OffenceRange.RIGOUR;
@@ -47,9 +70,8 @@ public interface WarpGauntletConfig extends Config
             keyName = "offencePrayerMage",
             name = "Mage prayer",
             description = "What offence mage prayer to use",
-            position = 3
+            position = 6
     )
-
     default OffenceMage offencePrayerMage()
     {
         return OffenceMage.AUGURY;

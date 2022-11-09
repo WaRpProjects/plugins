@@ -1,3 +1,5 @@
+package net.warp.plugin.warpmasterthieving;
+
 import com.google.inject.Inject;
 import com.google.inject.Provides;
 

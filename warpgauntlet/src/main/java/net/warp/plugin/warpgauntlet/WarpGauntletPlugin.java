@@ -25,7 +25,7 @@ import java.util.Set;
 
 @PluginDescriptor(
         name = "WaRp Hunlef Swapper",
-        description = "Swaps prayer and weapons in the hunlef fight",
+        description = "Helps with Hunlef/Corrupted",
         enabledByDefault = false
 )
 
@@ -46,13 +46,13 @@ public class WarpGauntletPlugin extends LoopedPlugin
 
     private static final Set<Integer> rangeAttackID = Set.of(1711, 1712);
 
-    private static final int[] bowID = { 23901, 23902, 23903};
+    private static final int[] bowID = { 23901, 23902, 23903, 23855, 23856, 23857 };
 
-    private static final int[] staffID = { 23898, 23899, 23900 };
+    private static final int[] staffID = { 23898, 23899, 23900, 23852, 23853, 23854 };
 
     private static final int[] hunlefID = { 9021, 9022, 9023, 9024, 9035, 9036, 9037, 9038 };
 
-    private static final int[] potionID = { 23882, 23883, 23884 };
+    private static final int[] potionID = { 23882, 23883, 23884, 23885 };
     private NPC hunlef = null;
 
 
@@ -88,7 +88,7 @@ public class WarpGauntletPlugin extends LoopedPlugin
             Item staff = Inventory.getFirst(staffID);
             Item bow = Inventory.getFirst(bowID);
             hunlef = NPCs.getNearest(hunlefID);
-            if (hunlef.getTransformedComposition().getOverheadIcon() == HeadIcon.MAGIC && !Equipment.contains(bowID))
+            if (config.swapWeapon() && hunlef.getTransformedComposition().getOverheadIcon() == HeadIcon.MAGIC && !Equipment.contains(bowID))
             {
                 log.debug("Magic overhead");
                 if (bow != null)
@@ -98,7 +98,7 @@ public class WarpGauntletPlugin extends LoopedPlugin
                 }
             }
 
-            if (hunlef.getTransformedComposition().getOverheadIcon() == HeadIcon.RANGED && !Equipment.contains(staffID))
+            if (config.swapWeapon() && hunlef.getTransformedComposition().getOverheadIcon() == HeadIcon.RANGED && !Equipment.contains(staffID))
             {
                 log.debug("Range overhead");
                 if (staff != null)
@@ -140,7 +140,7 @@ public class WarpGauntletPlugin extends LoopedPlugin
         if (isHunllefVarbitSet())
         {
             Item potion = Inventory.getFirst(potionID);
-            Item food = Inventory.getFirst(23874);
+            Item food = Inventory.getFirst(23874, 25958);
 
             if (config.eat() && Combat.getHealthPercent() <= config.healthPercent() && food != null)
             {
@@ -148,7 +148,7 @@ public class WarpGauntletPlugin extends LoopedPlugin
                 food.interact(InteractMethod.PACKETS, "Eat");
                 return 300;
             }
-            if (Prayers.getPoints() <= 27)
+            if (config.drinkPot() && Prayers.getPoints() <= config.prayerPoints() && potion != null)
             {
                 potion.interact(InteractMethod.PACKETS, "Drink");
                 return 300;

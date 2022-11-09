@@ -3,6 +3,7 @@ package net.warp.plugin.warpcutter;
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.EquipmentInventorySlot;
+import net.runelite.api.GameState;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.unethicalite.api.commons.Rand;
@@ -49,7 +50,6 @@ public class WarpCutterPlugin extends LoopedPlugin
     @Override
     protected int loop()
     {
-
         var tree = TileObjects
                 .getSurrounding(Players.getLocal().getWorldLocation(), 15, config.boom().getNames())
                 .stream()

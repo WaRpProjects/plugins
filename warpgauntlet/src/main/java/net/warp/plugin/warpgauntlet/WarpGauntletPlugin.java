@@ -14,6 +14,7 @@ import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.unethicalite.api.entities.NPCs;
+import net.unethicalite.api.entities.Players;
 import net.unethicalite.api.game.Combat;
 import net.unethicalite.api.interaction.InteractMethod;
 import net.unethicalite.api.items.Equipment;
@@ -22,12 +23,13 @@ import net.unethicalite.api.plugins.LoopedPlugin;
 import net.unethicalite.api.widgets.Prayers;
 import net.unethicalite.api.widgets.Widgets;
 
+import org.checkerframework.checker.units.qual.A;
 import org.pf4j.Extension;
 
 import java.util.Set;
 @PluginDescriptor(
-        name = "WaRp Hunlef Swapper",
-        description = "Helps with Hunlef/Corrupted",
+        name = "WaRp Hunllef Swapper",
+        description = "Helps with Hunllef/Corrupted",
         enabledByDefault = false
 )
 @Slf4j
@@ -40,16 +42,18 @@ public class WarpGauntletPlugin extends LoopedPlugin
     * Prayer flick
     * Add Demi Bosses
     */
-    private final Set<Integer> magicAttackID = Set.of(1706, 1707, 1708);
+    private final Set<Integer> magicAttackID = Set.of(1707, 1708);
     private final Set<Integer> rangeAttackID = Set.of(1711, 1712);
+    private final Set<Integer> prayerAttackID = Set.of(1713, 1714);
     private final int[] bowID = { 23901, 23902, 23903, 23855, 23856, 23857 };
     private final int[] staffID = { 23898, 23899, 23900, 23852, 23853, 23854 };
     private final int[] hunlefID = { 9021, 9022, 9023, 9024, 9035, 9036, 9037, 9038 };
     private final int[] potionID = { 23882, 23883, 23884, 23885 };
     private final int[] foodID = { 23874, 25958 };
-    private NPC hunlef = null;
+
+    private NPC hunllef = null;
     private int attackCount = 4;
-    private AttackPhase attackPhase = AttackPhase.RANGE;
+    private AttackPhase attackPhase;
     @Provides
     WarpGauntletConfig provideConfig(ConfigManager configManager)
     {
@@ -66,6 +70,7 @@ public class WarpGauntletPlugin extends LoopedPlugin
         {
             if (isHunllefVarbitSet() && !isPrayingMissiles())
             {
+                log.debug("Entering Hunlef toggle MISSILE Prayer");
                 togglePrayer(Prayer.PROTECT_FROM_MISSILES);
                 attackPhase = AttackPhase.RANGE;
             }
@@ -76,15 +81,16 @@ public class WarpGauntletPlugin extends LoopedPlugin
     {
         if (isHunllefVarbitSet())
         {
-            hunlef = NPCs.getNearest(hunlefID);
-            if (config.swapWeapon() && npcHeadIcon(hunlef) == HeadIcon.MAGIC && !Equipment.contains(bowID))
+            hunllef = NPCs.getNearest(hunlefID);
+            if (npcHeadIcon(hunllef) == HeadIcon.MAGIC && swapWeapon(bowID))
             {
-                log.debug("equiping Bow");
+                log.debug("equipping Bow");
                 Inventory.getFirst(bowID).interact(InteractMethod.PACKETS, "Wield");
             }
-            if (config.swapWeapon() && npcHeadIcon(hunlef) == HeadIcon.RANGED && !Equipment.contains(staffID))
+
+            if (npcHeadIcon(hunllef) == HeadIcon.RANGED && swapWeapon(staffID))
             {
-                log.debug("equiping Staff");
+                log.debug("equipping Staff");
                 Inventory.getFirst(staffID).interact(InteractMethod.PACKETS, "Wield");
             }
         }
@@ -94,8 +100,7 @@ public class WarpGauntletPlugin extends LoopedPlugin
     {
         if (chatMessage.getMessage().contains("Your prayers have been") && isHunllefVarbitSet())
         {
-            log.debug("Prayers been disabled turning on: " + attackPhase.getPrayer().name());
-            togglePrayer(attackPhase.getPrayer());
+            log.debug("Prayers have been disabled");
         }
     }
     @Subscribe
@@ -104,26 +109,25 @@ public class WarpGauntletPlugin extends LoopedPlugin
         if (isHunllefVarbitSet())
         {
             Projectile projectile = projectileSpawned.getProjectile();
-            if (magicAttackID.contains(projectile.getId()) || rangeAttackID.contains(projectile.getId()))
+            if (hunllefAttack(projectile))
             {
                 --attackCount;
-                log.debug("Attack count: " + attackCount);
-            }
+                log.debug("Counting down attacks: " + attackCount);
 
-            if (magicAttackID.contains(projectile.getId()))
-            {
-                if (!isPrayingMagic())
+                if (attackCount == 0)
                 {
-                    togglePrayer(Prayer.PROTECT_FROM_MAGIC);
-                    attackPhase = AttackPhase.MAGIC;
-                }
-            }
-            if (rangeAttackID.contains(projectile.getId()))
-            {
-                if (!isPrayingMissiles())
-                {
-                    togglePrayer(Prayer.PROTECT_FROM_MISSILES);
-                    attackPhase = AttackPhase.RANGE;
+                    log.debug("Time to switch Defencive prayer");
+                    switch(attackPhase)
+                    {
+                        case MAGIC:
+                            attackPhase = AttackPhase.RANGE;
+                            break;
+                        case RANGE:
+                            attackPhase = AttackPhase.MAGIC;
+                            break;
+                    }
+                    log.debug("Switching attack phase: " + attackPhase);
+                    attackCount = 4;
                 }
             }
         }
@@ -138,61 +142,41 @@ public class WarpGauntletPlugin extends LoopedPlugin
 
             if (config.eat() && Combat.getHealthPercent() <= config.healthPercent() && food != null)
             {
+                log.debug("Eating");
                 food.interact(InteractMethod.PACKETS, "Eat");
-                return 300;
+                return 600;
             }
             if (config.drinkPot() && Prayers.getPoints() <= config.prayerPoints() && potion != null)
             {
+                log.debug("Drinking Prayer pot at " + Prayers.getPoints() + "Prayer points");
                 potion.interact(InteractMethod.PACKETS, "Drink");
-                return 300;
+                return 600;
             }
 
-            if (attackPhase == AttackPhase.MAGIC && !isPrayingMagic())
+            if (!Prayers.isEnabled(attackPhase.getPrayer()) || playerHeadIcon() == null)
             {
-                log.debug("Magic phase switching Prayer");
-                togglePrayer(Prayer.PROTECT_FROM_MAGIC);
-                return 300;
-            }
-
-            if (attackPhase == AttackPhase.RANGE && !isPrayingMissiles())
-            {
-                log.debug("Range phase switching prayer");
-                togglePrayer(Prayer.PROTECT_FROM_MISSILES);
-                return 300;
-            }
-
-            if (attackCount == 0 && isPrayingMissiles() && attackPhase == AttackPhase.RANGE)
-            {
-                log.debug("Pre switching Prayers: MAGIC");
-                togglePrayer(Prayer.PROTECT_FROM_MAGIC);
-                attackPhase = AttackPhase.MAGIC;
-                attackCount = 4;
-                return 300;
-            }
-
-            if (attackCount == 0 && isPrayingMagic() && attackPhase == AttackPhase.MAGIC)
-            {
-                log.debug("Pre switching Prayers: MISSILES" );
-                togglePrayer(Prayer.PROTECT_FROM_MISSILES);
-                attackPhase = AttackPhase.RANGE;
-                attackCount = 4;
-                return 300;
+                log.debug("Defencive prayer: " + attackPhase.getPrayer());
+                togglePrayer(attackPhase.getPrayer());
+                return 600;
             }
 
             if (Equipment.contains(bowID) && !Prayers.isEnabled(config.offencePrayerRange().getPrayer()))
             {
+                log.debug("Offencive prayer");
                 togglePrayer(config.offencePrayerRange().getPrayer());
-                return 300;
+                return 600;
             }
 
             if (Equipment.contains(staffID) && !Prayers.isEnabled(config.offencePrayerMage().getPrayer()))
             {
+                log.debug("Offencive Mage prayer");
                 togglePrayer(config.offencePrayerMage().getPrayer());
-                return 300;
+                return 600;
             }
         }
         return 300;
     }
+
     private void togglePrayer(Prayer prayer)
     {
         Widget widget = Widgets.get(prayer.getWidgetInfo());
@@ -203,12 +187,10 @@ public class WarpGauntletPlugin extends LoopedPlugin
     }
 
     private HeadIcon npcHeadIcon(NPC npc) { return npc.getTransformedComposition().getOverheadIcon(); }
-
-    private boolean isPrayingMagic() { return Prayers.isEnabled(Prayer.PROTECT_FROM_MAGIC); }
+    private HeadIcon playerHeadIcon() { return Players.getLocal().getOverheadIcon(); }
     private boolean isPrayingMissiles() { return Prayers.isEnabled(Prayer.PROTECT_FROM_MISSILES); }
-    private boolean isHunllefVarbitSet()
-    {
-        return client.getVar(9177) == 1;
-    }
+    private boolean swapWeapon(int[] weapon) { return !Equipment.contains(weapon) && config.swapWeapon(); }
+    private boolean hunllefAttack(Projectile projectile) { return magicAttackID.contains(projectile.getId()) || rangeAttackID.contains(projectile.getId()) || prayerAttackID.contains(projectile.getId());}
+    private boolean isHunllefVarbitSet() { return client.getVar(9177) == 1; }
 
 }

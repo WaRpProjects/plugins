@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Item;
 import net.runelite.api.widgets.Widget;
 import net.unethicalite.api.commons.Rand;
-import net.unethicalite.api.entities.NPCs;
 import net.unethicalite.api.entities.Players;
 import net.unethicalite.api.input.Keyboard;
 import net.unethicalite.api.items.Bank;
@@ -22,9 +21,7 @@ public class GemTask implements Task {
     {
         this.plugin = plugin;
     }
-
-    private WarpSkillerPlugin plugin;
-
+    private final WarpSkillerPlugin plugin;
     @Override
     public boolean validate()
     {
@@ -35,42 +32,13 @@ public class GemTask implements Task {
     public int execute() {
 
         String gemType = "Uncut " + plugin.config.gemType().getGemName();
-
         Widget makeMenu = Widgets.get(270, 0);
 
-        var bankNPC = NPCs.getNearest(plugin.bankNPCID);
-
-        log.debug("Gem cutting it is..");
-        if (!Inventory.contains(gemType) || !Inventory.contains("Chisel"))
+        log.debug("GemTask started");
+        if (!Inventory.contains(gemType) || !Inventory.contains("Chisel") )
         {
-            if (!Bank.isOpen() && bankNPC != null)
-            {
-                bankNPC.interact("Bank");
-                log.debug("Bank opened");
-                return Rand.nextInt(923, 1892);
-            }
-
-            if (Bank.isOpen() && !Inventory.contains("Chisel"))
-            {
-                log.debug("Withdrawing Chisel");
-                Bank.depositAllExcept(gemType, "Chisel");
-                Bank.withdraw("Chisel", 1, Bank.WithdrawMode.ITEM);
-                return Rand.nextInt(923, 1892);
-            }
-            if (Bank.isOpen() && !Inventory.contains(gemType))
-            {
-                log.debug("Withdrawing " + gemType);
-                Bank.depositAllExcept(gemType, "Chisel");
-                Bank.withdraw(gemType, 27, Bank.WithdrawMode.ITEM);
-                return Rand.nextInt(923, 1892);
-            }
-        }
-
-        if (Bank.isOpen())
-        {
-            log.debug("Closing bank");
-            Bank.close();
-            return Rand.nextInt(796, 923);
+            plugin.banking = true;
+            return Rand.nextInt(484, 858);
         }
 
         Item uncutGem = Inventory.getFirst(gemType);
@@ -91,9 +59,6 @@ public class GemTask implements Task {
                 return Rand.nextInt(33043, 35934);
             }
         }
-
-
-
-        return Rand.nextInt(1200, 1500);
+            return Rand.nextInt(1200, 1500);
     }
 }

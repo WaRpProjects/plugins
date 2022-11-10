@@ -52,7 +52,7 @@ public interface WarpSkillerConfig extends Config {
             position = 0,
             section = general
     )
-    default SkillTask skillTask() { return SkillTask.CRAFT; }
+    default SkillTask skillTask() { return SkillTask.SLEEP; }
 
     @ConfigItem(
             keyName = "gemType",
@@ -90,6 +90,22 @@ public interface WarpSkillerConfig extends Config {
     )
     default Bars barType() {return Bars.IRON; }
 
+    @ConfigItem(
+            keyName = "bowType",
+            name = "Bow: ",
+            description = "What type of bow to fletch",
+            position = 0,
+            section = fletching
+    )
+    default Bows bow() { return Bows.LONGBOW; }
 
+    @ConfigItem(
+            keyName = "logType",
+            name = "Log:",
+            description = "What log to use",
+            position = 1,
+            section = fletching
+    )
+    default Logs log() { return Logs.YEW; }
 
 }

@@ -8,9 +8,11 @@ public enum Bars {
     //STEEL("N", "Iron ore", "Coal");
 
     private String barName;
-    private String[] ores;
 
-    Bars(String barName, String... ores)
+    private int amount;
+    private String ores;
+
+    Bars(String barName, String ores)
     {
         this.barName = barName;
         this.ores = ores;

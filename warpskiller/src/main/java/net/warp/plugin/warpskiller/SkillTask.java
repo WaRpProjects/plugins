@@ -4,6 +4,7 @@ import lombok.Getter;
 
 @Getter
 public enum SkillTask {
+    SLEEP("Sleep"),
     CRAFT("Craft"),
     FLETCH("Fletch"),
     MAGIC("Magic");

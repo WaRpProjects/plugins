@@ -162,14 +162,14 @@ public class WarpGauntletPlugin extends LoopedPlugin
 
             if (Equipment.contains(bowID) && !Prayers.isEnabled(config.offencePrayerRange().getPrayer()))
             {
-                log.debug("Offencive prayer");
+                log.debug("Offencive prayer: " + config.offencePrayerRange().getPrayer());
                 togglePrayer(config.offencePrayerRange().getPrayer());
                 return 600;
             }
 
             if (Equipment.contains(staffID) && !Prayers.isEnabled(config.offencePrayerMage().getPrayer()))
             {
-                log.debug("Offencive Mage prayer");
+                log.debug("Offencive prayer: " + config.offencePrayerMage().getPrayer());
                 togglePrayer(config.offencePrayerMage().getPrayer());
                 return 600;
             }

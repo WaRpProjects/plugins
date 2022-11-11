@@ -66,19 +66,16 @@ public class WarpMasterThieverPlugin extends LoopedPlugin {
             return Rand.nextInt(685, 1293);
         }
 
-        if (seeds != null)
+        if (Inventory.contains(seeds))
         {
-            if (Inventory.contains(seeds))
-            {
-                log.debug("Dropping shit");
-                Inventory.getFirst(config.seedToDrop()).interact("Drop");
-                return Rand.nextInt(394, 864);
-            }
+            log.debug("Dropping seeds");
+            Inventory.getFirst(seeds).interact("Drop");
+            return Rand.nextInt(394, 864);
         }
+
 
         if (!Inventory.contains(config.foodName()) || Inventory.isFull())
         {
-            log.debug("Banking start");
             if (bank == null && !Players.getLocal().isMoving())
             {
                 log.debug("Walking to bank");
@@ -93,18 +90,21 @@ public class WarpMasterThieverPlugin extends LoopedPlugin {
                 return Rand.nextInt(1293, 1892);
             }
 
-            if (Inventory.contains(x -> x.getName().contains("seed")))
+            if (Bank.isOpen())
             {
-                Bank.depositAllExcept(config.foodName());
-                return Rand.nextInt(233, 433);
-            }
+                if (Bank.isOpen() && Inventory.contains(x -> x.getName().contains("seed")) && Inventory.getCount(config.foodName()) < config.foodAmount())
+                {
+                    log.debug("Deposit seeds");
+                    Bank.depositAllExcept(config.foodName());
+                    return Rand.nextInt(233, 433);
+                }
 
-            if(Bank.isOpen() && Inventory.getCount(config.foodName()) < config.foodAmount())
-            {
-                log.debug("Withdrawing food");
-                Bank.depositAllExcept(config.foodName());
-                Bank.withdraw(config.foodName(), config.foodAmount() - Inventory.getCount(config.foodName()), Bank.WithdrawMode.ITEM);
-                return Rand.nextInt(874, 1293);
+                if(Bank.isOpen() && Inventory.getCount(config.foodName()) < config.foodAmount())
+                {
+                    log.debug("Withdraw food");
+                    Bank.withdraw(config.foodName(), config.foodAmount() - Inventory.getCount(config.foodName()), Bank.WithdrawMode.ITEM);
+                    return Rand.nextInt(874, 1293);
+                }
             }
         }
 
@@ -115,19 +115,18 @@ public class WarpMasterThieverPlugin extends LoopedPlugin {
             return 343;
         }
 
-        if (farmer == null && Inventory.contains(config.foodName()))
+        if (farmer == null)
         {
-            log.debug("Waiting for farmer...");
+            log.debug("Walking to farmer...");
             Movement.walkTo(farmerArea.getRandom());
             return Rand.nextInt(923, 3843);
         }
 
-        if (farmer != null && Inventory.contains(config.foodName()) && Players.getLocal().getGraphic() != 245)
+        if (Players.getLocal().getGraphic() != 245)
         {
             farmer.interact("Pickpocket");
-            return Rand.nextInt(622, 765);
+            return Rand.nextInt(344, 944);
         }
-
         return Rand.nextInt(789, 1345);
     }
 }

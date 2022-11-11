@@ -11,10 +11,10 @@ public enum OffenceRange
     RIGOUR("Rigour", Prayer.RIGOUR);
 
     private final String prayerName;
-    private final Prayer prayer;
-    OffenceRange(String prayerName, Prayer prayer)
+    private final Prayer prayerType;
+    OffenceRange(String prayerName, Prayer prayerType)
     {
         this.prayerName = prayerName;
-        this.prayer = prayer;
+        this.prayerType = prayerType;
     }
 }

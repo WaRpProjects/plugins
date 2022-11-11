@@ -5,10 +5,7 @@ import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 
 import net.runelite.api.*;
-import net.runelite.api.events.ChatMessage;
-import net.runelite.api.events.GameTick;
-import net.runelite.api.events.ProjectileSpawned;
-import net.runelite.api.events.VarbitChanged;
+import net.runelite.api.events.*;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
@@ -23,7 +20,6 @@ import net.unethicalite.api.plugins.LoopedPlugin;
 import net.unethicalite.api.widgets.Prayers;
 import net.unethicalite.api.widgets.Widgets;
 
-import org.checkerframework.checker.units.qual.A;
 import org.pf4j.Extension;
 
 import java.util.Set;
@@ -96,14 +92,6 @@ public class WarpGauntletPlugin extends LoopedPlugin
         }
     }
     @Subscribe
-    private void onChatMessage (ChatMessage chatMessage)
-    {
-        if (chatMessage.getMessage().contains("Your prayers have been") && isHunllefVarbitSet())
-        {
-            log.debug("Prayers have been disabled");
-        }
-    }
-    @Subscribe
     private void onProjectileSpawned (ProjectileSpawned projectileSpawned)
     {
         if (isHunllefVarbitSet())
@@ -116,16 +104,7 @@ public class WarpGauntletPlugin extends LoopedPlugin
 
                 if (attackCount == 0)
                 {
-                    log.debug("Time to switch Defencive prayer");
-                    switch(attackPhase)
-                    {
-                        case MAGIC:
-                            attackPhase = AttackPhase.RANGE;
-                            break;
-                        case RANGE:
-                            attackPhase = AttackPhase.MAGIC;
-                            break;
-                    }
+                    attackPhase = attackPhase == AttackPhase.RANGE ? AttackPhase.MAGIC : AttackPhase.RANGE;
                     log.debug("Switching attack phase: " + attackPhase);
                     attackCount = 4;
                 }
@@ -146,31 +125,32 @@ public class WarpGauntletPlugin extends LoopedPlugin
                 food.interact(InteractMethod.PACKETS, "Eat");
                 return 600;
             }
+
             if (config.drinkPot() && Prayers.getPoints() <= config.prayerPoints() && potion != null)
             {
-                log.debug("Drinking Prayer pot at " + Prayers.getPoints() + "Prayer points");
+                log.debug("Drinking Prayer pot at " + Prayers.getPoints() + " Prayer points");
                 potion.interact(InteractMethod.PACKETS, "Drink");
                 return 600;
             }
 
-            if (!Prayers.isEnabled(attackPhase.getPrayer()) || playerHeadIcon() == null)
+            if (!Prayers.isEnabled(attackPhase.getPrayerType()) || playerHeadIcon() == null)
             {
-                log.debug("Defencive prayer: " + attackPhase.getPrayer());
-                togglePrayer(attackPhase.getPrayer());
+                log.debug("Defencive prayer: " + attackPhase.getPrayerType());
+                togglePrayer(attackPhase.getPrayerType());
                 return 600;
             }
 
-            if (Equipment.contains(bowID) && !Prayers.isEnabled(config.offencePrayerRange().getPrayer()))
+            if (Equipment.contains(bowID) && !Prayers.isEnabled(config.offencePrayerRange().getPrayerType()))
             {
-                log.debug("Offencive prayer: " + config.offencePrayerRange().getPrayer());
-                togglePrayer(config.offencePrayerRange().getPrayer());
+                log.debug("Offencive prayer: " + config.offencePrayerRange().getPrayerType());
+                togglePrayer(config.offencePrayerRange().getPrayerType());
                 return 600;
             }
 
-            if (Equipment.contains(staffID) && !Prayers.isEnabled(config.offencePrayerMage().getPrayer()))
+            if (Equipment.contains(staffID) && !Prayers.isEnabled(config.offencePrayerMage().getPrayerType()))
             {
-                log.debug("Offencive prayer: " + config.offencePrayerMage().getPrayer());
-                togglePrayer(config.offencePrayerMage().getPrayer());
+                log.debug("Offencive prayer: " + config.offencePrayerMage().getPrayerType());
+                togglePrayer(config.offencePrayerMage().getPrayerType());
                 return 600;
             }
         }

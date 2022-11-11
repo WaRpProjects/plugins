@@ -10,11 +10,11 @@ public enum OffenceMage
     AUGURY("Augury", Prayer.AUGURY);
 
     private final String prayerName;
-    private final Prayer prayer;
+    private final Prayer prayerType;
 
-    OffenceMage(String prayerName, Prayer prayer)
+    OffenceMage(String prayerName, Prayer prayerType)
     {
         this.prayerName = prayerName;
-        this.prayer = prayer;
+        this.prayerType = prayerType;
     }
 }

@@ -1,18 +1,23 @@
 package net.warp.plugin.warpgauntlet;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.Range;
+import net.runelite.client.config.*;
 
 @ConfigGroup("warpgauntlet")
 public interface WarpGauntletConfig extends Config
 {
+    @ConfigSection(
+            name = "Warp hunllef helper",
+            description = "Fight settings",
+            position = 0
+    )
+    String general = "General";
+
     @ConfigItem(
             keyName = "eat",
             name = "Eat food",
             description = "Eat food to heal",
-            position = 0
+            position = 0,
+            section = general
     )
     default boolean eat()
     {
@@ -24,7 +29,8 @@ public interface WarpGauntletConfig extends Config
             keyName = "eatHealthPercent",
             name = "Health %",
             description = "Health % to eat at",
-            position = 1
+            position = 1,
+            section = general
     )
     default int healthPercent()
     {
@@ -35,7 +41,8 @@ public interface WarpGauntletConfig extends Config
             keyName = "drinkPot",
             name = "Drink Egniol",
             description = "Drink Egniol pots",
-            position = 2
+            position = 2,
+            section = general
     )
     default boolean drinkPot() { return true; }
 
@@ -43,7 +50,8 @@ public interface WarpGauntletConfig extends Config
             keyName = "prayerPoints",
             name = "When to drink Egniol",
             description = "When to drink Egniol potion",
-            position = 3
+            position = 3,
+            section = general
     )
     default int prayerPoints() { return 28; }
 
@@ -51,7 +59,8 @@ public interface WarpGauntletConfig extends Config
             keyName = "swapWeapon",
             name = "Swap weapons",
             description = "Swap weapons",
-            position = 4
+            position = 4,
+            section = general
     )
     default boolean swapWeapon() { return true; }
 
@@ -59,7 +68,8 @@ public interface WarpGauntletConfig extends Config
             keyName = "offencePrayerRange",
             name = "Range prayer",
             description = "What offence range prayer to use",
-            position = 5
+            position = 5,
+            section = general
     )
     default OffenceRange offencePrayerRange()
     {
@@ -70,7 +80,8 @@ public interface WarpGauntletConfig extends Config
             keyName = "offencePrayerMage",
             name = "Mage prayer",
             description = "What offence mage prayer to use",
-            position = 6
+            position = 6,
+            section = general
     )
     default OffenceMage offencePrayerMage()
     {

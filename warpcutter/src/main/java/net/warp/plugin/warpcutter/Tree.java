@@ -4,14 +4,12 @@ import lombok.Getter;
 @Getter
 public enum Tree
 {
-    YEW(60, "Yew"),
-    MAGIC(75, "Magic tree");
-        private final int level;
-        private final String names;
-        Tree(int level, String names)
+    YEW("Yew"),
+    MAGIC( "Magic tree");
+        private final String treeName;
+        Tree(String treeName)
         {
-            this.level = level;
-            this.names = names;
+            this.treeName = treeName;
         }
 
 }

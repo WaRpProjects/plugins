@@ -5,8 +5,6 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 
-import javax.xml.crypto.dsig.keyinfo.KeyName;
-
 @ConfigGroup("warpskiller")
 public interface WarpSkillerConfig extends Config {
 
@@ -25,7 +23,7 @@ public interface WarpSkillerConfig extends Config {
             closedByDefault = true,
             hidden = true
     )
-    String gemCutter = "Cuts gems";
+    String crafting = "Crafting";
 
     @ConfigSection(
             name = "Magic",
@@ -33,7 +31,7 @@ public interface WarpSkillerConfig extends Config {
             position = 2,
             closedByDefault = true
     )
-    String magicSpell = "magicSpell";
+    String magic = "Magic";
 
     @ConfigSection(
             name = "Fletching",
@@ -41,9 +39,7 @@ public interface WarpSkillerConfig extends Config {
             position = 3,
             closedByDefault = true
     )
-    String fletching = "fletching";
-
-
+    String fletching = "Fletching";
 
     @ConfigItem(
             keyName = "skillTask",
@@ -59,7 +55,7 @@ public interface WarpSkillerConfig extends Config {
             name = "Gem to cut:",
             description = "What gem to cut",
             position = 0,
-            section = gemCutter
+            section = crafting
     )
     default Gems gemType() { return Gems.SAPPHIRE; }
 
@@ -68,7 +64,7 @@ public interface WarpSkillerConfig extends Config {
             name = "Spell to Cast:",
             description = "What spell to cast",
             position = 0,
-            section = magicSpell
+            section = magic
     )
     default Spells spellType() { return Spells.HIGH_ALCH; }
 
@@ -77,7 +73,7 @@ public interface WarpSkillerConfig extends Config {
             name = "Item to alch:",
             description = "Name of the item to alch",
             position = 1,
-            section = magicSpell
+            section = magic
     )
     default String alchItem() { return "Yew shortbow (u)"; }
 
@@ -86,7 +82,7 @@ public interface WarpSkillerConfig extends Config {
             name = "Bar:",
             description = "Which bar to Superheat",
             position = 2,
-            section = magicSpell
+            section = magic
     )
     default Bars barType() {return Bars.IRON; }
 

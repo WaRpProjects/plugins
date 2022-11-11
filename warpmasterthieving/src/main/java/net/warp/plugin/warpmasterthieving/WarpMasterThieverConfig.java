@@ -1,18 +1,21 @@
 package net.warp.plugin.warpmasterthieving;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.Range;
+import net.runelite.client.config.*;
 
 @ConfigGroup("warpmasterthieving")
 public interface WarpMasterThieverConfig extends Config {
-
+    @ConfigSection(
+            name = "Warp Thieving",
+            description = "Thieving settings",
+            position = 0
+    )
+    String general = "Warp Thieving";
     @ConfigItem(
             keyName = "eat",
             name = "Eat food",
             description = "Eat food to heal",
-            position = 0
+            position = 0,
+            section = general
     )
     default boolean eat()
     {
@@ -24,7 +27,8 @@ public interface WarpMasterThieverConfig extends Config {
             keyName = "eatHealthPercent",
             name = "Health %",
             description = "Health % to eat at",
-            position = 1
+            position = 1,
+            section = general
     )
     default int healthPercent()
     {
@@ -35,7 +39,8 @@ public interface WarpMasterThieverConfig extends Config {
             keyName = "foodName",
             name = "Food name:",
             description = "Name of the food..",
-            position = 2
+            position = 2,
+            section = general
     )
     default String foodName() { return "Cake"; }
 
@@ -43,7 +48,8 @@ public interface WarpMasterThieverConfig extends Config {
             keyName = "foodAmount",
             name = "Amount:",
             description = "Amount of food to take",
-            position = 3
+            position = 3,
+            section = general
     )
     default int foodAmount() { return 5; }
 
@@ -51,7 +57,8 @@ public interface WarpMasterThieverConfig extends Config {
             keyName = "seedToDrop",
             name = "Seeds to drop: ",
             description = "Itemnames to drop",
-            position = 4
+            position = 4,
+            section = general
     )
     default String seedToDrop() { return "Hammerstone seed,"; }
 }

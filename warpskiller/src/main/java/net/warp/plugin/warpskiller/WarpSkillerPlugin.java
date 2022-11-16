@@ -16,10 +16,9 @@ import org.pf4j.Extension;
 
 @PluginDescriptor(
         name = "WaRp Skiller",
-        description = "Skills at GE.",
+        description = "Skills at any bank.",
         enabledByDefault = false
 )
-
 @Slf4j
 @Extension
 public class WarpSkillerPlugin extends TaskPlugin {

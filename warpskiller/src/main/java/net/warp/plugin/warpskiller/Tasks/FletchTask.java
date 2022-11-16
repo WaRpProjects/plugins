@@ -50,6 +50,12 @@ public class FletchTask implements Task {
                 Widget shortbow = Widgets.get(270, 15);
                 Widget longbow = Widgets.get(270, 16);
 
+                if (plugin.config.log() == Logs.LOGS)
+                {
+                    shortbow = Widgets.get(270, 16);
+                    longbow = Widgets.get(270, 17);
+                }
+
                 if (plugin.config.bow() == Bows.SHORTBOW && shortbow != null) {
                     shortbow.interact(0);
                     return Rand.nextInt(897, 1293);

@@ -41,6 +41,14 @@ public interface WarpSkillerConfig extends Config {
     )
     String fletching = "Fletching";
 
+    @ConfigSection(
+            name = "Herblore",
+            description = "Herblore settings",
+            position = 4,
+            closedByDefault = true
+    )
+    String herblore = "Herblore";
+
     @ConfigItem(
             keyName = "skillTask",
             name = "Select a skill:",
@@ -103,5 +111,4 @@ public interface WarpSkillerConfig extends Config {
             section = fletching
     )
     default Logs log() { return Logs.YEW; }
-
 }

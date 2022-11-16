@@ -1,7 +1,7 @@
-version = "0.0.7"
+version = "0.0.8"
 
 project.extra["PluginName"] = "WarpSkiller"
-project.extra["PluginDescription"] = "Does some GE skilling"
+project.extra["PluginDescription"] = "Does some bank skilling"
 
 tasks {
     jar {

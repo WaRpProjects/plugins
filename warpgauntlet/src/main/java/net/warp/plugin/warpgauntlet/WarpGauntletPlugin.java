@@ -46,6 +46,7 @@ public class WarpGauntletPlugin extends LoopedPlugin
     private final int[] hunlefID = { 9021, 9022, 9023, 9024, 9035, 9036, 9037, 9038 };
     private final int[] potionID = { 23882, 23883, 23884, 23885 };
     private final int[] foodID = { 23874, 25958 };
+    public static final int HUNLEFF_TORNADO = 8418;
 
     private NPC hunllef = null;
     private int attackCount = 4;
@@ -62,14 +63,17 @@ public class WarpGauntletPlugin extends LoopedPlugin
     @Subscribe
     private void onVarbitChanged (VarbitChanged varbitChanged)
     {
-        if (varbitChanged.getVarbitId() == 9177)
+        if (varbitChanged.getVarbitId() == 9178)
         {
-            if (isHunllefVarbitSet() && !isPrayingMissiles())
-            {
-                log.debug("Entering Hunlef toggle MISSILE Prayer");
-                togglePrayer(Prayer.PROTECT_FROM_MISSILES);
-                attackPhase = AttackPhase.RANGE;
-            }
+            log.debug("Entered Gauntlet resetting attackPhase");
+            attackPhase = AttackPhase.RANGE;
+            attackCount = 4;
+        }
+
+        if (varbitChanged.getVarbitId() == 9177 && hunllef != null)
+        {
+            log.debug("Entering Hunlef toggle MISSILE Prayer");
+            togglePrayer(Prayer.PROTECT_FROM_MISSILES);
         }
     }
     @Subscribe
@@ -101,12 +105,23 @@ public class WarpGauntletPlugin extends LoopedPlugin
             {
                 --attackCount;
                 log.debug("Counting down attacks: " + attackCount);
+            }
+        }
+    }
+    @Subscribe
+    private void onAnimationChanged(final AnimationChanged animationChanged)
+    {
+        if (isHunllefVarbitSet())
+        {
+            final Actor actor = animationChanged.getActor();
+            final int animationId = actor.getAnimation();
 
-                if (attackCount == 0)
+            if (actor instanceof NPC)
+            {
+                if (animationId == HUNLEFF_TORNADO)
                 {
-                    attackPhase = attackPhase == AttackPhase.RANGE ? AttackPhase.MAGIC : AttackPhase.RANGE;
-                    log.debug("Switching attack phase: " + attackPhase);
-                    attackCount = 4;
+                    --attackCount;
+                    log.debug("Counting down attacks: " + attackCount);
                 }
             }
         }
@@ -119,42 +134,49 @@ public class WarpGauntletPlugin extends LoopedPlugin
             Item potion = Inventory.getFirst(potionID);
             Item food = Inventory.getFirst(foodID);
 
-            if (config.eat() && Combat.getHealthPercent() <= config.healthPercent() && food != null)
+            if (attackCount == 0)
             {
-                log.debug("Eating");
-                food.interact(InteractMethod.PACKETS, "Eat");
-                return 600;
-            }
-
-            if (config.drinkPot() && Prayers.getPoints() <= config.prayerPoints() && potion != null)
-            {
-                log.debug("Drinking Prayer pot at " + Prayers.getPoints() + " Prayer points");
-                potion.interact(InteractMethod.PACKETS, "Drink");
-                return 600;
+                attackPhase = attackPhase == AttackPhase.RANGE ? AttackPhase.MAGIC : AttackPhase.RANGE;
+                log.debug("Switching attack phase: " + attackPhase);
+                attackCount = 4;
             }
 
             if (!Prayers.isEnabled(attackPhase.getPrayerType()) || playerHeadIcon() == null)
             {
                 log.debug("Defencive prayer: " + attackPhase.getPrayerType());
                 togglePrayer(attackPhase.getPrayerType());
-                return 600;
+                return -1;
+            }
+
+            if (config.eat() && Combat.getHealthPercent() <= config.healthPercent() && food != null)
+            {
+                log.debug("Eating");
+                food.interact(InteractMethod.PACKETS, "Eat");
+                return -1;
+            }
+
+            if (config.drinkPot() && Prayers.getPoints() <= config.prayerPoints() && potion != null)
+            {
+                log.debug("Drinking Prayer pot at " + Prayers.getPoints() + " Prayer points");
+                potion.interact(InteractMethod.PACKETS, "Drink");
+                return -1;
             }
 
             if (Equipment.contains(bowID) && !Prayers.isEnabled(config.offencePrayerRange().getPrayerType()))
             {
                 log.debug("Offencive prayer: " + config.offencePrayerRange().getPrayerType());
                 togglePrayer(config.offencePrayerRange().getPrayerType());
-                return 600;
+                return -1;
             }
 
             if (Equipment.contains(staffID) && !Prayers.isEnabled(config.offencePrayerMage().getPrayerType()))
             {
                 log.debug("Offencive prayer: " + config.offencePrayerMage().getPrayerType());
                 togglePrayer(config.offencePrayerMage().getPrayerType());
-                return 600;
+                return -1;
             }
         }
-        return 300;
+        return -1;
     }
 
     private void togglePrayer(Prayer prayer)
@@ -168,9 +190,13 @@ public class WarpGauntletPlugin extends LoopedPlugin
 
     private HeadIcon npcHeadIcon(NPC npc) { return npc.getTransformedComposition().getOverheadIcon(); }
     private HeadIcon playerHeadIcon() { return Players.getLocal().getOverheadIcon(); }
-    private boolean isPrayingMissiles() { return Prayers.isEnabled(Prayer.PROTECT_FROM_MISSILES); }
+    //private boolean isPrayingMissiles() { return Prayers.isEnabled(Prayer.PROTECT_FROM_MISSILES); }
     private boolean swapWeapon(int[] weapon) { return !Equipment.contains(weapon) && config.swapWeapon(); }
-    private boolean hunllefAttack(Projectile projectile) { return magicAttackID.contains(projectile.getId()) || rangeAttackID.contains(projectile.getId()) || prayerAttackID.contains(projectile.getId());}
+    private boolean hunllefAttack(Projectile projectile)
+    {
+        return magicAttackID.contains(projectile.getId()) ||
+            rangeAttackID.contains(projectile.getId()) ||
+            prayerAttackID.contains(projectile.getId());
+    }
     private boolean isHunllefVarbitSet() { return client.getVar(9177) == 1; }
-
 }

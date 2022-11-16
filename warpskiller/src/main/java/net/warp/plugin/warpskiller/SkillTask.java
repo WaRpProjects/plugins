@@ -7,7 +7,8 @@ public enum SkillTask {
     SLEEP("Sleep"),
     CRAFT("Craft"),
     MAGIC("Magic"),
-    FLETCH("Fletch");
+    FLETCH("Fletch"),
+    HERBLORE("Herblore");
 
     private final String taskName;
     SkillTask(String taskName)

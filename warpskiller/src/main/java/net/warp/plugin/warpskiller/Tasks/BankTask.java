@@ -1,16 +1,16 @@
 package net.warp.plugin.warpskiller.Tasks;
 
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Item;
-import net.runelite.api.NPC;
 import net.unethicalite.api.commons.Rand;
-import net.unethicalite.api.entities.NPCs;
+import net.unethicalite.api.entities.TileObjects;
 import net.unethicalite.api.items.Bank;
 import net.unethicalite.api.items.Equipment;
 import net.unethicalite.api.items.Inventory;
 import net.unethicalite.api.plugins.Task;
 import net.warp.plugin.warpskiller.Logs;
 import net.warp.plugin.warpskiller.WarpSkillerPlugin;
+import java.util.Set;
+
 @Slf4j
 public class BankTask implements Task {
 
@@ -21,8 +21,8 @@ public class BankTask implements Task {
     private final String chisel = "Chisel";
     private final String natureRune = "Nature rune";
     private final String fireRune = "Fire rune";
-    private String banker = "Banker";
-
+    private Set<String> bankObjects = Set.of("Bank booth", "Grand Exchange booth", "Bank chest") ;
+    private String[] bankText = {"Bank", "Use"};
     private final int[] staffID = {12000, 1387};
 
     private boolean needFireRune;
@@ -36,14 +36,14 @@ public class BankTask implements Task {
     @Override
     public int execute() {
 
-        NPC bankNPC = NPCs.getNearest(banker);
+        var bankObject = TileObjects
+                .getNearest(x -> x.hasAction(bankText) &&
+                        bankObjects.contains(x.getName()));
 
-        log.debug("BankTask started");
-
-        if(!Bank.isOpen() && bankNPC != null)
+        if(!Bank.isOpen() && bankObject != null)
         {
             log.debug("Opening bank");
-            bankNPC.interact("Bank");
+            bankObject.interact(bankText);
             return Rand.nextInt(523, 892);
         }
         if (Bank.isOpen())
@@ -59,7 +59,7 @@ public class BankTask implements Task {
             {
                 case CRAFT:
                     String gemName = "Uncut " + plugin.config.gemType().getGemName();
-
+                    Bank.depositAllExcept(chisel, gemName);
                     if (!Inventory.contains(chisel) && Bank.contains(chisel))
                     {
                         log.debug("Withdrawing chisel");

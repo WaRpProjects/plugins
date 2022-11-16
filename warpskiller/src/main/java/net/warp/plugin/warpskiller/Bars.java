@@ -8,8 +8,6 @@ public enum Bars {
     //STEEL("N", "Iron ore", "Coal");
 
     private String barName;
-
-    private int amount;
     private String ores;
 
     Bars(String barName, String ores)

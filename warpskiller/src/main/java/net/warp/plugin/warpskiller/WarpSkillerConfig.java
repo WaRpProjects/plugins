@@ -4,6 +4,7 @@ import net.runelite.client.config.Config;
 import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
+import net.warp.plugin.warpskiller.Items.*;
 
 @ConfigGroup("warpskiller")
 public interface WarpSkillerConfig extends Config {
@@ -111,4 +112,30 @@ public interface WarpSkillerConfig extends Config {
             section = fletching
     )
     default Logs log() { return Logs.YEW; }
+    @ConfigItem(
+            keyName = "herbloreType",
+            name = "Herblore: ",
+            description = "What to do",
+            position = 0,
+            section = herblore
+    )
+    default Herblore herbloreType() { return Herblore.CLEAN; }
+
+    @ConfigItem(
+            keyName = "potionItem1",
+            name = "Item name:",
+            description = "What item to combine",
+            position = 1,
+            section = herblore
+    )
+    default String potionItem1() { return "Vial of water"; }
+
+    @ConfigItem(
+            keyName = "potionItem2",
+            name = "Item name:",
+            description = "What item to combine",
+            position = 1,
+            section = herblore
+    )
+    default String potionItem2() { return "Guam leaf"; }
 }

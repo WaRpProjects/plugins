@@ -1,18 +1,12 @@
 package net.warp.plugin.warpskiller.Tasks;
 
-import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.Item;
-import net.runelite.client.config.ConfigManager;
 import net.unethicalite.api.commons.Rand;
-import net.unethicalite.api.entities.NPCs;
-import net.unethicalite.api.items.Bank;
 import net.unethicalite.api.items.Equipment;
 import net.unethicalite.api.items.Inventory;
 import net.unethicalite.api.magic.Magic;
 import net.unethicalite.api.plugins.Task;
-import net.warp.plugin.warpskiller.SkillTask;
-import net.warp.plugin.warpskiller.WarpSkillerConfig;
+import net.warp.plugin.warpskiller.Items.SkillTask;
 import net.warp.plugin.warpskiller.WarpSkillerPlugin;
 
 @Slf4j

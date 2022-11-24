@@ -1,4 +1,4 @@
-package net.warp.plugin.warpskiller;
+package net.warp.plugin.warpskiller.Items;
 
 import lombok.Getter;
 import net.unethicalite.api.magic.Spell;

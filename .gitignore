@@ -44,3 +44,6 @@ config/checkstyle
 /gradle/
 /release/
 /src/
+/warpfarm/*
+/warpherbiboar/
+/warpvyrekiller/

@@ -44,7 +44,10 @@ public interface WarpGauntletConfig extends Config
             position = 2,
             section = general
     )
-    default boolean drinkPot() { return true; }
+    default boolean drinkPot()
+    {
+        return true;
+    }
 
     @ConfigItem(
             keyName = "prayerPoints",
@@ -53,7 +56,10 @@ public interface WarpGauntletConfig extends Config
             position = 3,
             section = general
     )
-    default int prayerPoints() { return 28; }
+    default int prayerPoints()
+    {
+        return 28;
+    }
 
     @ConfigItem(
             keyName = "swapWeapon",
@@ -62,7 +68,10 @@ public interface WarpGauntletConfig extends Config
             position = 4,
             section = general
     )
-    default boolean swapWeapon() { return true; }
+    default boolean swapWeapon()
+    {
+        return true;
+    }
 
     @ConfigItem(
             keyName = "offencePrayerRange",

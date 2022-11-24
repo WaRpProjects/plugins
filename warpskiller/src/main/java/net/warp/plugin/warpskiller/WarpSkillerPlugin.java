@@ -44,7 +44,7 @@ public class WarpSkillerPlugin extends TaskPlugin {
 
     @Inject
     public WarpSkillerConfig config;
-    private final Task[] taskList = { new BankTask(this),  new MagicTask(this), new FletchTask(this) , new GemTask(this) };
+    private final Task[] taskList = { new BankTask(this),  new MagicTask(this), new FletchTask(this) , new GemTask(this), new HerbloreTask(this) };
 
     @Override
     public Task[] getTasks() {

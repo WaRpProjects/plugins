@@ -4,6 +4,10 @@ import lombok.Getter;
 @Getter
 public enum Tree
 {
+    TREE("Tree"),
+    OAK("Oak"),
+    WILLOW("Willow"),
+    MAPLE("Maple tree"),
     YEW("Yew"),
     MAGIC( "Magic tree");
         private final String treeName;

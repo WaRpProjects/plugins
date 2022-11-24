@@ -8,9 +8,9 @@ import net.unethicalite.api.entities.Players;
 import net.unethicalite.api.items.Inventory;
 import net.unethicalite.api.plugins.Task;
 import net.unethicalite.api.widgets.Widgets;
-import net.warp.plugin.warpskiller.Bows;
-import net.warp.plugin.warpskiller.Logs;
-import net.warp.plugin.warpskiller.SkillTask;
+import net.warp.plugin.warpskiller.Items.Bows;
+import net.warp.plugin.warpskiller.Items.Logs;
+import net.warp.plugin.warpskiller.Items.SkillTask;
 import net.warp.plugin.warpskiller.WarpSkillerPlugin;
 @Slf4j
 public class FletchTask implements Task {

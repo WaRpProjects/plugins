@@ -5,6 +5,7 @@ import com.google.inject.Provides;
 
 import lombok.extern.slf4j.Slf4j;
 
+import net.runelite.api.Player;
 import net.runelite.api.coords.WorldArea;
 import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.config.ConfigManager;
@@ -50,7 +51,7 @@ public class WarpMasterThieverPlugin extends LoopedPlugin {
     protected int loop() {
 
         var bank = TileObjects
-                .getSurrounding(Players.getLocal().getWorldLocation(), 30, bankBooth)
+                .getSurrounding(Players.getLocal().getWorldLocation(), 23, bankBooth)
                 .stream()
                 .min(Comparator.comparing(x -> x.distanceTo(Players.getLocal().getWorldLocation())))
                 .orElse(null);
@@ -59,74 +60,79 @@ public class WarpMasterThieverPlugin extends LoopedPlugin {
 
         String[] seeds = config.seedToDrop().split(",");
 
+        Player local = Players.getLocal();
+
         if (Combat.getHealthPercent() <= config.healthPercent() && Inventory.contains(config.foodName()))
         {
             log.debug("Eating: " + config.foodName());
             Inventory.getFirst(config.foodName()).interact("Eat");
-            return Rand.nextInt(685, 1293);
+            return -2;
         }
 
         if (Inventory.contains(seeds))
         {
             log.debug("Dropping seeds");
             Inventory.getFirst(seeds).interact("Drop");
-            return Rand.nextInt(394, 864);
+            return -1;
         }
 
-
-        if (!Inventory.contains(config.foodName()) || Inventory.isFull())
+        if (Movement.isWalking() || local.getGraphic() == 245)
         {
-            if (bank == null && !Players.getLocal().isMoving())
+            return -2;
+        }
+
+        if (Bank.isOpen())
+        {
+            if (Inventory.contains(x -> x.getName().contains("seed")))
+            {
+                log.debug("Deposit seeds");
+                Bank.depositInventory();
+                return -1;
+            }
+
+            if (Inventory.getCount(config.foodName()) < config.foodAmount())
+            {
+                log.debug("Withdraw food");
+                Bank.withdraw(config.foodName(), config.foodAmount() - Inventory.getCount(config.foodName()), Bank.WithdrawMode.ITEM);
+                return -2;
+            }
+
+            if (Inventory.getCount(config.foodName()) >= config.foodAmount())
+            {
+                log.debug("Closing bank");
+                Bank.close();
+                return -2;
+            }
+        }
+
+        if (!Inventory.contains(config.foodName()) || Inventory.isFull()) {
+
+            if (!bankArea.contains(local.getWorldLocation()))
             {
                 log.debug("Walking to bank");
                 Movement.walkTo(bankArea.getRandom());
-                return Rand.nextInt(1293, 1892);
+                return -1;
             }
 
-            if (bank != null && !Bank.isOpen() && !Movement.isWalking())
-            {
+            if (!Bank.isOpen()) {
                 log.debug("Click bank");
                 bank.interact("Bank");
-                return Rand.nextInt(1293, 1892);
-            }
-
-            if (Bank.isOpen())
-            {
-                if (Bank.isOpen() && Inventory.contains(x -> x.getName().contains("seed")) && Inventory.getCount(config.foodName()) < config.foodAmount())
-                {
-                    log.debug("Deposit seeds");
-                    Bank.depositAllExcept(config.foodName());
-                    return Rand.nextInt(233, 433);
-                }
-
-                if(Bank.isOpen() && Inventory.getCount(config.foodName()) < config.foodAmount())
-                {
-                    log.debug("Withdraw food");
-                    Bank.withdraw(config.foodName(), config.foodAmount() - Inventory.getCount(config.foodName()), Bank.WithdrawMode.ITEM);
-                    return Rand.nextInt(874, 1293);
-                }
+                return -2;
             }
         }
 
-        if (Bank.isOpen() && Inventory.getCount(config.foodName()) == config.foodAmount())
-        {
-            log.debug("Closing bank");
-            Bank.close();
-            return 343;
-        }
-
-        if (farmer == null)
-        {
-            log.debug("Walking to farmer...");
-            Movement.walkTo(farmerArea.getRandom());
-            return Rand.nextInt(923, 3843);
-        }
-
-        if (Players.getLocal().getGraphic() != 245)
+        if (farmer != null)
         {
             farmer.interact("Pickpocket");
-            return Rand.nextInt(344, 944);
+            return Rand.nextInt(344, 544);
         }
-        return Rand.nextInt(789, 1345);
+
+        if (!farmerArea.contains(local.getWorldLocation()))
+        {
+            log.debug("Walking to farmer");
+            Movement.walkTo(farmerArea.getRandom());
+            return -2;
+        }
+        return -3;
     }
 }

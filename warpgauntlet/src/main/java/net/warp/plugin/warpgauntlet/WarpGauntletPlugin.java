@@ -32,21 +32,15 @@ import java.util.Set;
 @Extension
 public class WarpGauntletPlugin extends LoopedPlugin
 {
-    /*
-    ToDo:
-    * Find a way to see if i can auto attack
-    * Prayer flick
-    * Add Demi Bosses
-    */
     private final Set<Integer> magicAttackID = Set.of(1707, 1708);
     private final Set<Integer> rangeAttackID = Set.of(1711, 1712);
     private final Set<Integer> prayerAttackID = Set.of(1713, 1714);
     private final int[] bowID = { 23901, 23902, 23903, 23855, 23856, 23857 };
     private final int[] staffID = { 23898, 23899, 23900, 23852, 23853, 23854 };
-    private final int[] hunlefID = { 9021, 9022, 9023, 9024, 9035, 9036, 9037, 9038 };
+    private final int[] hunleffID = { 9021, 9022, 9023, 9024, 9035, 9036, 9037, 9038 };
+    public static final int hunleffTornado = 8418;
     private final int[] potionID = { 23882, 23883, 23884, 23885 };
     private final int[] foodID = { 23874, 25958 };
-    public static final int HUNLEFF_TORNADO = 8418;
 
     private NPC hunllef = null;
     private int attackCount = 4;
@@ -81,16 +75,16 @@ public class WarpGauntletPlugin extends LoopedPlugin
     {
         if (isHunllefVarbitSet())
         {
-            hunllef = NPCs.getNearest(hunlefID);
+            hunllef = NPCs.getNearest(hunleffID);
             if (npcHeadIcon(hunllef) == HeadIcon.MAGIC && swapWeapon(bowID))
             {
-                log.debug("equipping Bow");
+                log.debug("Equipping bow");
                 Inventory.getFirst(bowID).interact(InteractMethod.PACKETS, "Wield");
             }
 
             if (npcHeadIcon(hunllef) == HeadIcon.RANGED && swapWeapon(staffID))
             {
-                log.debug("equipping Staff");
+                log.debug("Equipping Staff");
                 Inventory.getFirst(staffID).interact(InteractMethod.PACKETS, "Wield");
             }
         }
@@ -118,7 +112,7 @@ public class WarpGauntletPlugin extends LoopedPlugin
 
             if (actor instanceof NPC)
             {
-                if (animationId == HUNLEFF_TORNADO)
+                if (animationId == hunleffTornado)
                 {
                     --attackCount;
                     log.debug("Counting down attacks: " + attackCount);
@@ -139,6 +133,7 @@ public class WarpGauntletPlugin extends LoopedPlugin
                 attackPhase = attackPhase == AttackPhase.RANGE ? AttackPhase.MAGIC : AttackPhase.RANGE;
                 log.debug("Switching attack phase: " + attackPhase);
                 attackCount = 4;
+                return -1;
             }
 
             if (!Prayers.isEnabled(attackPhase.getPrayerType()) || playerHeadIcon() == null)
@@ -188,15 +183,26 @@ public class WarpGauntletPlugin extends LoopedPlugin
         }
     }
 
-    private HeadIcon npcHeadIcon(NPC npc) { return npc.getTransformedComposition().getOverheadIcon(); }
-    private HeadIcon playerHeadIcon() { return Players.getLocal().getOverheadIcon(); }
-    //private boolean isPrayingMissiles() { return Prayers.isEnabled(Prayer.PROTECT_FROM_MISSILES); }
-    private boolean swapWeapon(int[] weapon) { return !Equipment.contains(weapon) && config.swapWeapon(); }
+    private HeadIcon npcHeadIcon(NPC npc)
+    {
+        return npc.getTransformedComposition().getOverheadIcon();
+    }
+    private HeadIcon playerHeadIcon()
+    {
+        return Players.getLocal().getOverheadIcon();
+    }
+    private boolean swapWeapon(int[] weapon)
+    {
+        return !Equipment.contains(weapon) && config.swapWeapon();
+    }
+    private boolean isHunllefVarbitSet()
+    {
+        return client.getVar(9177) == 1;
+    }
     private boolean hunllefAttack(Projectile projectile)
     {
         return magicAttackID.contains(projectile.getId()) ||
             rangeAttackID.contains(projectile.getId()) ||
             prayerAttackID.contains(projectile.getId());
     }
-    private boolean isHunllefVarbitSet() { return client.getVar(9177) == 1; }
 }

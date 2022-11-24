@@ -9,7 +9,7 @@ import net.unethicalite.api.input.Keyboard;
 import net.unethicalite.api.items.Bank;
 import net.unethicalite.api.items.Inventory;
 import net.unethicalite.api.widgets.Widgets;
-import net.warp.plugin.warpskiller.SkillTask;
+import net.warp.plugin.warpskiller.Items.SkillTask;
 import net.unethicalite.api.plugins.Task;
 import net.warp.plugin.warpskiller.WarpSkillerPlugin;
 

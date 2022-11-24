@@ -1,15 +1,18 @@
 package net.warp.plugin.warpskiller.Tasks;
 
 import lombok.extern.slf4j.Slf4j;
+import net.runelite.api.Item;
 import net.unethicalite.api.commons.Rand;
 import net.unethicalite.api.entities.TileObjects;
 import net.unethicalite.api.items.Bank;
 import net.unethicalite.api.items.Equipment;
 import net.unethicalite.api.items.Inventory;
 import net.unethicalite.api.plugins.Task;
-import net.warp.plugin.warpskiller.Logs;
+import net.warp.plugin.warpskiller.Items.Herblore;
+import net.warp.plugin.warpskiller.Items.Logs;
 import net.warp.plugin.warpskiller.WarpSkillerPlugin;
 import java.util.Set;
+import java.util.function.Predicate;
 
 @Slf4j
 public class BankTask implements Task {
@@ -57,6 +60,37 @@ public class BankTask implements Task {
 
             switch(plugin.config.skillTask())
             {
+                case HERBLORE:
+                    switch (plugin.config.herbloreType())
+                    {
+                        case CLEAN:
+                            Item grimy = Bank.getFirst(x -> x.getName().contains("Grimy"));
+                            log.debug("Deposit inventory");
+
+                            if (grimy != null && !Inventory.contains(grimy.getName()))
+                            {
+                                Bank.depositInventory();
+                                log.debug("Withdrawing Grimy");
+                                Bank.withdraw(grimy.getName(), 300, Bank.WithdrawMode.ITEM);
+                                return -4;
+                            }
+                            break;
+                        case POTION:
+                            Bank.depositAllExcept(plugin.config.potionItem1(), plugin.config.potionItem2());
+                            if (!Inventory.contains(plugin.config.potionItem1()) && Bank.contains(plugin.config.potionItem1()))
+                            {
+                                Bank.withdraw(plugin.config.potionItem1(), 14, Bank.WithdrawMode.ITEM);
+                                return -2;
+                            }
+                            if (!Inventory.contains(plugin.config.potionItem2()) && Bank.contains(plugin.config.potionItem2()))
+                            {
+                                Bank.withdraw(plugin.config.potionItem2(), 14, Bank.WithdrawMode.ITEM);
+                                return -2;
+                            }
+                            break;
+                    }
+                    break;
+
                 case CRAFT:
                     String gemName = "Uncut " + plugin.config.gemType().getGemName();
                     Bank.depositAllExcept(chisel, gemName);
@@ -165,5 +199,10 @@ public class BankTask implements Task {
     {
         if (plugin.config.log() == Logs.LOGS) return Logs.LOGS.getLogName();
         return plugin.config.log().getLogName() + "logs";
+    }
+
+    private void stopScript()
+    {
+       //Swin
     }
 }

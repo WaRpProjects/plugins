@@ -70,16 +70,16 @@ public class WarpCutterPlugin extends LoopedPlugin
             Combat.toggleSpec();
         }
 
-        if (local.isAnimating() || local.isMoving())
+        if (local.isAnimating() || Movement.isWalking())
         {
-            return -3;
+            return -1;
         }
 
         if (birdNest != null && !Inventory.isFull() && config.getNest())
         {
             log.debug("Getting Bird nest");
             birdNest.pickup();
-            return Rand.nextInt(794, 1738);
+            return -3;
         }
 
         if (config.locationName() == Location.POWERCHOP)
@@ -102,7 +102,7 @@ public class WarpCutterPlugin extends LoopedPlugin
         if (Inventory.isFull() && !Bank.isOpen())
         {
 
-            if (!config.locationName().getBankArea().contains(local.getWorldLocation()))
+            if (config.locationName().getBankArea().distanceTo(local.getWorldLocation()) > 3)
             {
                 if (config.locationName() == Location.PORT_SARIM)
                 {

@@ -3,6 +3,7 @@ package net.warp.plugin.warpskiller.Tasks;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Item;
 import net.unethicalite.api.commons.Rand;
+import net.unethicalite.api.commons.Time;
 import net.unethicalite.api.entities.TileObjects;
 import net.unethicalite.api.items.Bank;
 import net.unethicalite.api.items.Equipment;
@@ -47,7 +48,7 @@ public class BankTask implements Task {
         {
             log.debug("Opening bank");
             bankObject.interact(bankText);
-            return Rand.nextInt(523, 892);
+            return -1;
         }
         if (Bank.isOpen())
         {
@@ -55,7 +56,7 @@ public class BankTask implements Task {
             {
                 Bank.depositInventory();
                 plugin.firstRun = false;
-                return 300;
+                return -1;
             }
 
             switch(plugin.config.skillTask())
@@ -70,9 +71,10 @@ public class BankTask implements Task {
                             if (grimy != null && !Inventory.contains(grimy.getName()))
                             {
                                 Bank.depositInventory();
+                                Time.sleep(150);
                                 log.debug("Withdrawing Grimy");
                                 Bank.withdraw(grimy.getName(), 300, Bank.WithdrawMode.ITEM);
-                                return -4;
+                                return -2;
                             }
                             break;
                         case POTION:
@@ -94,18 +96,19 @@ public class BankTask implements Task {
                 case CRAFT:
                     String gemName = "Uncut " + plugin.config.gemType().getGemName();
                     Bank.depositAllExcept(chisel, gemName);
+                    Time.sleep(300);
                     if (!Inventory.contains(chisel) && Bank.contains(chisel))
                     {
                         log.debug("Withdrawing chisel");
                         Bank.withdraw(chisel, 1 ,Bank.WithdrawMode.ITEM);
-                        return Rand.nextInt(384, 766);
+                        return -1;
                     }
 
                     if (!Inventory.contains(gemName))
                     {
                         log.debug("Withdrawing: " + gemName);
                         Bank.withdraw(gemName, 27, Bank.WithdrawMode.ITEM);
-                        return Rand.nextInt(463, 844);
+                        return -1;
                     }
                     break;
                 case MAGIC:
@@ -120,17 +123,19 @@ public class BankTask implements Task {
 
                         log.debug("Withdrawing: " + plugin.staff.getName());
                         Bank.depositAllExcept(alchItem, ore, plugin.staff.getName());
+                        Time.sleep(150);
                         Bank.withdraw(plugin.staff.getId(), 1, Bank.WithdrawMode.ITEM);
                         needFireRune = false;
-                        return Rand.nextInt(423, 892);
+                        return -2;
                     }
 
                     if (Bank.contains(natureRune) && !Inventory.contains(natureRune))
                     {
                         log.debug("Withdrawing: " + natureRune);
                         Bank.depositAllExcept(plugin.staff.getName());
+                        Time.sleep(150);
                         Bank.withdraw(natureRune, Rand.nextInt(20000, 434203), Bank.WithdrawMode.ITEM);
-                        return Rand.nextInt(423, 892);
+                        return -1;
                     }
 
                     if (needFireRune)
@@ -138,7 +143,7 @@ public class BankTask implements Task {
                         log.debug("Withdrawing: " + fireRune);
                         Bank.depositAllExcept(plugin.staff.getName(), natureRune);
                         Bank.withdraw(fireRune, Rand.nextInt(20000, 6748833), Bank.WithdrawMode.ITEM);
-                        return Rand.nextInt(423, 892);
+                        return -1;
                     }
 
                     switch (plugin.config.spellType())
@@ -149,8 +154,9 @@ public class BankTask implements Task {
                             {
                                 log.debug("Withdrawing: " + alchItem);
                                 Bank.depositAllExcept(plugin.staff.getName(), natureRune, fireRune);
+                                Time.sleep(150);
                                 Bank.withdraw(alchItem, Rand.nextInt(20000, 6748833), Bank.WithdrawMode.NOTED);
-                                return Rand.nextInt(423, 892);
+                                return -1;
                             }
                             break;
                         case SUPERHEAT:
@@ -158,8 +164,9 @@ public class BankTask implements Task {
                             {
                                 log.debug("Withdrawing: " + ore);
                                 Bank.depositAllExcept(plugin.staff.getName(), natureRune, fireRune);
+                                Time.sleep(150);
                                 Bank.withdraw(ore, 27, Bank.WithdrawMode.ITEM);
-                                return Rand.nextInt(723, 892);
+                                return -1;
                             }
                             break;
                     }
@@ -167,28 +174,28 @@ public class BankTask implements Task {
                 case FLETCH:
                     String logName = getLogName();
                     Bank.depositAllExcept(knife, logName);
+                    Time.sleep(150);
                     if (!Inventory.contains(knife))
                     {
                         log.debug("Withdrawing: " + knife);
                         Bank.withdraw(knife, 1, Bank.WithdrawMode.ITEM);
-                        return Rand.nextInt(723, 892);
+                        return -1;
                     }
 
                     if (!Inventory.contains(logName))
                     {
                         log.debug("Withdrawing: " + logName);
                         Bank.withdraw(logName, 27, Bank.WithdrawMode.ITEM);
-                        return Rand.nextInt(723, 892);
+                        return -1;
                     }
                     break;
             }
-
             log.debug("Closing bank");
             Bank.close();
             plugin.banking = false;
         }
         log.debug("Banking is: " + plugin.banking);
-        return Rand.nextInt(485, 999);
+        return -1;
     }
 
     private boolean staffEquiped()
@@ -199,10 +206,5 @@ public class BankTask implements Task {
     {
         if (plugin.config.log() == Logs.LOGS) return Logs.LOGS.getLogName();
         return plugin.config.log().getLogName() + "logs";
-    }
-
-    private void stopScript()
-    {
-       //Swin
     }
 }

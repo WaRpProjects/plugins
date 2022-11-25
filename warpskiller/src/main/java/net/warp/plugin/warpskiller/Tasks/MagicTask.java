@@ -1,7 +1,6 @@
 package net.warp.plugin.warpskiller.Tasks;
 
 import lombok.extern.slf4j.Slf4j;
-import net.unethicalite.api.commons.Rand;
 import net.unethicalite.api.items.Equipment;
 import net.unethicalite.api.items.Inventory;
 import net.unethicalite.api.magic.Magic;
@@ -31,13 +30,13 @@ public class MagicTask implements Task {
         {
             log.debug("We need items");
             plugin.banking = true;
-            return Rand.nextInt(484, 858);
+            return -1;
         }
 
-        if (!staffEquiped() && Inventory.contains(12000, 1387))
+        if (!staffEquipped() && Inventory.contains(12000, 1387))
         {
             Inventory.getFirst(12000, 1387).interact("Wield");
-            return Rand.nextInt(796, 923);
+            return -1;
         }
 
         switch(plugin.config.spellType())
@@ -48,7 +47,7 @@ public class MagicTask implements Task {
                 if (Inventory.contains(plugin.config.alchItem()) && Inventory.contains("Nature rune"))
                 {
                     Magic.cast(plugin.config.spellType().getSpellType(), Inventory.getFirst(plugin.config.alchItem()));
-                    return Rand.nextInt(1586, 2234);
+                    return -4;
                 }
                 break;
             case SUPERHEAT:
@@ -56,14 +55,13 @@ public class MagicTask implements Task {
                 if (Inventory.contains(plugin.config.barType().getOres()) && Inventory.contains("Nature rune"))
                 {
                     Magic.cast(plugin.config.spellType().getSpellType(), Inventory.getFirst(plugin.config.barType().getOres()));
-                    return Rand.nextInt(923, 1243);
+                    return -3;
                 }
                 break;
         }
-        return Rand.nextInt(1200, 1500);
+        return -1;
     }
-
-    private boolean staffEquiped() { return Equipment.contains(12000, 1387); }
+    private boolean staffEquipped() { return Equipment.contains(12000, 1387); }
     private boolean needItems ()
     {
         switch (plugin.config.spellType())

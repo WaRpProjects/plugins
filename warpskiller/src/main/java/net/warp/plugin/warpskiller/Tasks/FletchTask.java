@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Item;
 import net.runelite.api.widgets.Widget;
 import net.unethicalite.api.commons.Rand;
+import net.unethicalite.api.commons.Time;
 import net.unethicalite.api.entities.Players;
 import net.unethicalite.api.items.Inventory;
 import net.unethicalite.api.plugins.Task;
@@ -30,7 +31,7 @@ public class FletchTask implements Task {
         if (!Inventory.contains(logName) || !Inventory.contains(knifeName))
         {
             plugin.banking = true;
-            return Rand.nextInt(484, 858);
+            return -2;
         }
 
         Item logs = Inventory.getFirst(logName);
@@ -39,13 +40,13 @@ public class FletchTask implements Task {
         if (canFletch(logs, knife)) {
             Widget skillMenu = Widgets.get(270, 0);
 
-            if (skillMenu == null) {
+            if (!skillMenu.isVisible()) {
                 log.debug("Using know on logs");
                 knife.useOn(logs);
-                return Rand.nextInt(597, 893);
+                return -2;
             }
 
-            if (skillMenu != null) {
+            if (skillMenu.isVisible()) {
 
                 Widget shortbow = Widgets.get(270, 15);
                 Widget longbow = Widgets.get(270, 16);
@@ -58,16 +59,18 @@ public class FletchTask implements Task {
 
                 if (plugin.config.bow() == Bows.SHORTBOW && shortbow != null) {
                     shortbow.interact(0);
-                    return Rand.nextInt(897, 1293);
+                    Time.sleepUntil(() -> !Inventory.contains(logs.getName()), 2000);
+                    return -2;
                 }
 
                 if (plugin.config.bow() == Bows.LONGBOW && longbow != null) {
                     longbow.interact(0);
-                    return Rand.nextInt(897, 1293);
+                    Time.sleepUntil(() -> !Inventory.contains(logs.getName()), 2000);
+                    return -2;
                 }
             }
         }
-        return Rand.nextInt(483, 928);
+        return -2;
     }
     private String getLogName()
     {

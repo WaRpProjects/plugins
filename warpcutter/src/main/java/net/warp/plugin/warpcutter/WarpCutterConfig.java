@@ -5,6 +5,8 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 
+import java.util.Arrays;
+
 @ConfigGroup("warpcutter")
 public interface WarpCutterConfig extends Config
 {
@@ -39,7 +41,7 @@ public interface WarpCutterConfig extends Config
     )
     default Tree treeType()
     {
-        return Tree.WILLOW;
+        return locationName().getTreeChop()[0];
     }
     @ConfigItem(
             keyName = "useSpecial",

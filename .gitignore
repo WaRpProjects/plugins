@@ -29,7 +29,6 @@ buildSrc
 .github/workflows
 gradle/wrapper
 config/checkstyle
-*gradle*
 /src/
 /gradle/
 /config/
@@ -43,7 +42,6 @@ config/checkstyle
 /config/
 /gradle/
 /release/
-/src/
-/warpfarm/*
-/warpherbiboar/*
-/warpvyrekiller/*
+*/warpfarm/*
+*/warpherbiboar/*
+*/warpvyrekiller/*

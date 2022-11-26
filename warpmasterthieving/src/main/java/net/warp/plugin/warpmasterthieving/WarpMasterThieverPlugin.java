@@ -11,6 +11,7 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.unethicalite.api.commons.Rand;
+import net.unethicalite.api.commons.Time;
 import net.unethicalite.api.entities.NPCs;
 import net.unethicalite.api.entities.Players;
 import net.unethicalite.api.entities.TileObjects;
@@ -73,12 +74,20 @@ public class WarpMasterThieverPlugin extends LoopedPlugin {
         {
             log.debug("Dropping seeds");
             Inventory.getFirst(seeds).interact("Drop");
+            Time.sleepUntil(() -> !Inventory.contains(seeds), -2);
             return -1;
         }
 
-        if (Movement.isWalking() || local.getGraphic() == 245)
+        if (Movement.isWalking())
         {
-            return -2;
+            return -1;
+        }
+
+
+        if (local.getGraphic() == 245)
+        {
+            Time.sleepUntil(() -> local.getGraphic() != 245, -4);
+            return -1;
         }
 
         if (Bank.isOpen())
@@ -87,6 +96,7 @@ public class WarpMasterThieverPlugin extends LoopedPlugin {
             {
                 log.debug("Deposit seeds");
                 Bank.depositInventory();
+                Time.sleepUntil(Inventory::isEmpty, -2);
                 return -1;
             }
 
@@ -94,7 +104,8 @@ public class WarpMasterThieverPlugin extends LoopedPlugin {
             {
                 log.debug("Withdraw food");
                 Bank.withdraw(config.foodName(), config.foodAmount() - Inventory.getCount(config.foodName()), Bank.WithdrawMode.ITEM);
-                return -2;
+                Time.sleepUntil(() -> Inventory.getCount(config.foodName()) >= config.foodAmount(), -2);
+                return -1;
             }
 
             if (Inventory.getCount(config.foodName()) >= config.foodAmount())
@@ -117,7 +128,8 @@ public class WarpMasterThieverPlugin extends LoopedPlugin {
             if (!Bank.isOpen()) {
                 log.debug("Click bank");
                 bank.interact("Bank");
-                return -2;
+                Time.sleepUntil(Bank::isOpen, -2);
+                return -1;
             }
         }
 

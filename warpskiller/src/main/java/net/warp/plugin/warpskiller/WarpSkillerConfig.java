@@ -60,13 +60,33 @@ public interface WarpSkillerConfig extends Config {
     default SkillTask skillTask() { return SkillTask.SLEEP; }
 
     @ConfigItem(
-            keyName = "gemType",
-            name = "Gem to cut:",
-            description = "What gem to cut",
+            keyName = "craftTask",
+            name = "Craft: ",
+            description = "What to craft",
             position = 0,
             section = crafting
     )
+    default Crafting craftTask() { return Crafting.GLASSBLOW; }
+
+    @ConfigItem(
+            keyName = "glassBlow",
+            name = "Blow: ",
+            description = "What to blow",
+            position = 1,
+            section = crafting
+    )
+    default Glassblow glassBlow() { return Glassblow.BEER_GLASS; }
+
+    @ConfigItem(
+            keyName = "gemType",
+            name = "Gem to cut:",
+            description = "What gem to cut",
+            position = 2,
+            section = crafting
+    )
     default Gems gemType() { return Gems.SAPPHIRE; }
+
+
 
     @ConfigItem(
             keyName = "spellType",

@@ -10,8 +10,10 @@ import net.unethicalite.api.input.Keyboard;
 import net.unethicalite.api.items.Bank;
 import net.unethicalite.api.items.Inventory;
 import net.unethicalite.api.widgets.Widgets;
+import net.warp.plugin.warpskiller.Items.Crafting;
 import net.warp.plugin.warpskiller.Items.SkillTask;
 import net.unethicalite.api.plugins.Task;
+import net.warp.plugin.warpskiller.PluginStatus;
 import net.warp.plugin.warpskiller.WarpSkillerPlugin;
 
 
@@ -26,41 +28,51 @@ public class GemTask implements Task {
     @Override
     public boolean validate()
     {
-        return plugin.config.skillTask() == SkillTask.CRAFT;
+        return plugin.config.skillTask() == SkillTask.CRAFT && plugin.config.craftTask() == Crafting.GEMCUTTING;
     }
 
     @Override
-    public int execute() {
+    public int execute()
+    {
+        plugin.status = PluginStatus.GEMCUTTING;
 
-        String gemType = "Uncut " + plugin.config.gemType().getGemName();
+        String gemName = "Uncut " + plugin.config.gemType().getGemName();
+        String chiselName = "Chisel";
+
         Widget makeMenu = Widgets.get(270, 0);
 
+        plugin.item1 = chiselName;
+        plugin.item1Amount = 1;
+        plugin.item2 = gemName;
+        plugin.item2Amount = 27;
+
         log.debug("GemTask started");
-        if (!Inventory.contains(gemType) || !Inventory.contains("Chisel") )
+        if (!Inventory.contains(gemName) || !Inventory.contains(chiselName) )
         {
             plugin.banking = true;
             return -1;
         }
 
-        Item uncutGem = Inventory.getFirst(gemType);
-        Item chisel = Inventory.getFirst("Chisel");
 
-        if (uncutGem != null && chisel != null && !Players.getLocal().isAnimating())
+        Item uncutGem = Inventory.getFirst(gemName);
+        Item chisel = Inventory.getFirst(chiselName);
+
+        if (uncutGem != null && chisel != null)
         {
             if (makeMenu == null)
             {
                 log.debug("Using Chisel on Gem");
                 chisel.useOn(uncutGem);
-                Time.sleepUntil(() -> !Inventory.contains(uncutGem.getName()), 2000);
-                return -1;
+                return -2;
             }
 
-            if (makeMenu != null)
+            if (makeMenu.isVisible())
             {
                 Keyboard.sendSpace();
+                Time.sleepUntil(() -> !Inventory.contains(uncutGem.getName()), 60000);
                 return -1;
             }
         }
-            return -2;
+        return -2;
     }
 }

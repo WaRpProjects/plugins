@@ -2,18 +2,20 @@ package net.warp.plugin.warpcutter;
 
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
-import net.runelite.api.EquipmentInventorySlot;
-import net.runelite.api.Item;
-import net.runelite.api.Player;
+import net.runelite.api.*;
 import net.runelite.api.coords.WorldPoint;
+import net.runelite.api.events.ChatMessage;
 import net.runelite.client.config.ConfigManager;
+import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.runelite.client.ui.overlay.OverlayManager;
 import net.unethicalite.api.commons.Rand;
 import net.unethicalite.api.commons.Time;
 import net.unethicalite.api.entities.Players;
 import net.unethicalite.api.entities.TileItems;
 import net.unethicalite.api.entities.TileObjects;
 import net.unethicalite.api.game.Combat;
+import net.unethicalite.api.game.Skills;
 import net.unethicalite.api.items.Bank;
 import net.unethicalite.api.items.Equipment;
 import net.unethicalite.api.items.Inventory;
@@ -46,6 +48,48 @@ public class WarpCutterPlugin extends LoopedPlugin
     private Set<String> bankObjects = Set.of("Bank booth", "Grand Exchange booth", "Bank chest");
     private final String[] axeNames = {"Bronze axe", "Iron axe", "Steel axe", "Mithril axe", "Adamant axe", "Rune axe", "Dragon axe"};
     private final String[] bankText = {"Bank", "Use"};
+    @Inject
+    public Client client;
+    @Inject
+    public OverlayManager overlayManager;
+    @Inject
+    private BuilderOverlay builderOverlay;
+
+    public PluginStatus status;
+    public int startXP;
+    public int logs;
+    public int nests;
+    public long startTime;
+
+    @Override
+    protected void startUp()
+    {
+        overlayManager.add(builderOverlay);
+        if (client.getGameState() != GameState.LOGGED_IN)
+        {
+            return;
+        }
+        logs = 0;
+        status = PluginStatus.IDLE;
+        startXP = Skills.getExperience(Skill.WOODCUTTING);
+        startTime = System.currentTimeMillis();
+    }
+    @Subscribe
+    private void onChatMessage (ChatMessage m)
+    {
+        if (m.getMessage().contains("You get some"))
+        {
+            ++logs;
+        }
+    }
+
+    @Override
+    protected void shutDown()
+    {
+        overlayManager.remove(builderOverlay);
+    }
+
+
     @Override
     protected int loop()
     {
@@ -70,8 +114,15 @@ public class WarpCutterPlugin extends LoopedPlugin
             Combat.toggleSpec();
         }
 
-        if (local.isAnimating() || Movement.isWalking())
+        if (Movement.isWalking())
         {
+            status = PluginStatus.WALKING;
+            return -1;
+        }
+
+        if (local.isAnimating())
+        {
+            status = PluginStatus.CHOPPING;
             return -1;
         }
 
@@ -79,11 +130,13 @@ public class WarpCutterPlugin extends LoopedPlugin
         {
             log.debug("Getting Bird nest");
             birdNest.pickup();
+            ++nests;
             return -3;
         }
 
         if (config.locationName() == Location.POWERCHOP)
         {
+            status = PluginStatus.DROPPING;
             for (Item log : Inventory.getAll(x -> x.getName().toLowerCase().contains("logs")))
             {
                 log.drop();
@@ -92,6 +145,7 @@ public class WarpCutterPlugin extends LoopedPlugin
 
             if (tree != null)
             {
+                status = PluginStatus.CHOPPING;
                 log.debug("Chopping " + tree.getName());
                 tree.interact("Chop down");
                 return -4;
@@ -104,6 +158,7 @@ public class WarpCutterPlugin extends LoopedPlugin
 
             if (config.locationName().getBankArea().distanceTo(local.getWorldLocation()) > 3)
             {
+                status = PluginStatus.WALKING;
                 if (config.locationName() == Location.PORT_SARIM)
                 {
                     log.debug("Moving to bank: " + config.locationName().getLocationName());
@@ -117,6 +172,7 @@ public class WarpCutterPlugin extends LoopedPlugin
 
             if (bankObject != null && !Bank.isOpen())
             {
+                status = PluginStatus.BANK;
                 log.debug("Opening bank");
                 bankObject.interact(bankText);
                 return -2;
@@ -137,13 +193,13 @@ public class WarpCutterPlugin extends LoopedPlugin
         {
             if (!config.locationName().getTreeArea().contains(local.getWorldLocation()))
             {
+                status = PluginStatus.WALKING;
                 if (config.locationName() == Location.PORT_SARIM)
                 {
                     log.debug("Moving to tree location: " + config.locationName());
                     Movement.walkTo(getChopPoint());
                     return -1;
                 }
-
                 log.debug("Moving to tree's");
                 Movement.walk(getChopPoint());
                 return -1;
@@ -151,6 +207,7 @@ public class WarpCutterPlugin extends LoopedPlugin
 
             if (tree != null)
             {
+                status = PluginStatus.CHOPPING;
                 log.debug("Chopping " + tree.getName());
                 tree.interact("Chop down");
                 return -4;

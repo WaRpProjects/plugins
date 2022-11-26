@@ -9,6 +9,8 @@ import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.widgets.Widget;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.plugins.PluginDescriptor;
+import net.unethicalite.api.commons.Rand;
+import net.unethicalite.api.commons.Time;
 import net.unethicalite.api.entities.Players;
 import net.unethicalite.api.entities.TileItems;
 import net.unethicalite.api.game.Combat;
@@ -42,7 +44,8 @@ public class WarpCrabsPlugin extends LoopedPlugin {
     private WarpCrabsConfig config;
     @Inject
     private TimerUtil timerUtil;
-    private boolean timerRunning;
+    private boolean timerRunning = false;
+    private boolean getAmmo = false;
     private final WorldPoint walkLocation = new WorldPoint(1760, 3509, 0);
 
     @Override
@@ -59,6 +62,18 @@ public class WarpCrabsPlugin extends LoopedPlugin {
             return -1;
         }
 
+        if (config.eatFood() && Combat.getHealthPercent() <= config.healthPercent())
+        {
+            Item food = Inventory.getFirst(config.foodName());
+            if (food != null)
+            {
+                log.debug("Eating: " + config.foodName());
+                food.interact("Eat");
+                return -1;
+            }
+            log.debug("Error on eating no food..");
+        }
+
         if (config.highAlch())
         {
             Item alchItem = Inventory.getFirst(config.alchItem());
@@ -69,6 +84,7 @@ public class WarpCrabsPlugin extends LoopedPlugin {
                 Magic.cast(SpellBook.Standard.HIGH_LEVEL_ALCHEMY, alchItem);
                 return -4;
             }
+            log.debug("Missing item or runes for alching");
         }
 
         if (Movement.isWalking())
@@ -76,10 +92,10 @@ public class WarpCrabsPlugin extends LoopedPlugin {
             return -1;
         }
 
-        if (local.getWorldLocation().distanceTo(config.location().getLocationPoint()) < 1 && !timerRunning)
+        if (local.getWorldLocation().distanceTo(config.location().getLocationPoint()) < 2 && !timerRunning)
         {
             log.debug("Setting timer");
-            timerUtil.setSleepTime(10);
+            timerUtil.setSleepTime(Rand.nextInt(8, 11));
             timerRunning = true;
             return -1;
         }
@@ -96,20 +112,23 @@ public class WarpCrabsPlugin extends LoopedPlugin {
             return -2;
         }
 
-        if (!timerRunning && local.getWorldLocation().distanceTo(config.location().getLocationPoint()) == 0)
+        if (!timerRunning && local.getWorldLocation().distanceTo(config.location().getLocationPoint()) != 0 && !getAmmo)
         {
             log.debug("Moving to: " + config.location().getLocationName());
             Movement.walkTo(config.location().getLocationPoint());
             return -2;
         }
 
-        if (config.getAmmo())
+        if (config.getAmmo() && local.isIdle())
         {
             TileItem ammo = TileItems.getNearest(x -> x.distanceTo(local.getWorldLocation()) < 2 && x.getName().contains(config.ammoName()));
             if (ammo != null)
             {
+                getAmmo = true;
                 log.debug("Picking up ammo");
                 ammo.pickup();
+                Time.sleep(300);
+                getAmmo = false;
                 return -2;
             }
 

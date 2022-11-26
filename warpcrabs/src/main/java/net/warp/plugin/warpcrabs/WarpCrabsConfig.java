@@ -1,26 +1,37 @@
 package net.warp.plugin.warpcrabs;
 
-import net.runelite.client.config.Config;
-import net.runelite.client.config.ConfigGroup;
-import net.runelite.client.config.ConfigItem;
-import net.runelite.client.config.ConfigSection;
+import net.runelite.client.config.*;
 
 @ConfigGroup("warpcrabs")
 public interface WarpCrabsConfig extends Config
 {
     @ConfigSection(
-            name = "Warp Crabs",
+            name = "Location",
             description = "Settings",
             position = 0
     )
-    String general = "Warp Crabs";
+    String general = "Location";
+
+    @ConfigSection(
+            name = "Food",
+            description = "Food",
+            position = 1
+    )
+    String food = "Food";
 
     @ConfigSection(
             name = "High Alch",
             description = "Magic settings",
-            position = 0
+            position = 2
     )
     String highAlch = "High Alch";
+
+    @ConfigSection(
+            name = "Ammo",
+            description = "Ammo",
+            position = 3
+    )
+    String ammo = "Ammo";
 
     @ConfigItem(
             keyName = "location",
@@ -35,8 +46,8 @@ public interface WarpCrabsConfig extends Config
             keyName = "getAmmo",
             name = "pickup Ammo",
             description = "Pickup ammo",
-            position = 1,
-            section = general
+            position = 0,
+            section = ammo
     )
     default boolean getAmmo() { return false; }
 
@@ -44,10 +55,41 @@ public interface WarpCrabsConfig extends Config
             keyName = "ammoName",
             name = "Ammo name:",
             description = "Name of ammo to pickup",
-            position = 2,
-            section = general
+            position = 1,
+            section = ammo
     )
     default String ammoName() { return "Iron knife"; }
+
+    @ConfigItem(
+            keyName = "eatFood",
+            name = "Eat food",
+            description = "Eat food?",
+            position = 0,
+            section = food
+    )
+    default boolean eatFood() { return false; }
+
+    @Range(max = 100)
+    @ConfigItem(
+            keyName = "eatHealthPercent",
+            name = "Health %",
+            description = "Health % to eat at",
+            position = 1,
+            section = food
+    )
+    default int healthPercent()
+    {
+        return 65;
+    }
+
+    @ConfigItem(
+            keyName = "foodName",
+            name = "Food name:",
+            description = "Name of the food to eat",
+            position = 2,
+            section = food
+    )
+    default String foodName() { return "Salmon"; }
 
     @ConfigItem(
             keyName = "alchItems",
@@ -66,6 +108,4 @@ public interface WarpCrabsConfig extends Config
             section = highAlch
     )
     default String alchItem() { return "Rune full helm"; }
-
-
 }

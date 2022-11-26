@@ -5,9 +5,9 @@ import lombok.Getter;
 @Getter
 public enum SkillTask {
     SLEEP("Sleep"),
-    CRAFT("Craft"),
+    CRAFT("Crafting"),
     MAGIC("Magic"),
-    FLETCH("Fletch"),
+    FLETCH("Fletching"),
     HERBLORE("Herblore");
 
     private final String taskName;

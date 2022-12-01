@@ -1,4 +1,4 @@
-package net.warp.plugin.warpskiller.Items;
+package net.warp.plugin.warpskiller.Skills;
 
 import lombok.Getter;
 

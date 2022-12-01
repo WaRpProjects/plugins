@@ -4,9 +4,8 @@ import lombok.Getter;
 
 @Getter
 public enum Bars {
-    IRON("Iron", "Iron ore");
-    //STEEL("N", "Iron ore", "Coal");
-
+    IRON("Iron", "Iron ore"),
+    GOLD("Gold", "Gold ore");
     private String barName;
     private String ores;
 

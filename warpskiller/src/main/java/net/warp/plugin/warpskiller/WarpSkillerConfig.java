@@ -5,6 +5,9 @@ import net.runelite.client.config.ConfigGroup;
 import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 import net.warp.plugin.warpskiller.Items.*;
+import net.warp.plugin.warpskiller.Skills.Crafting;
+import net.warp.plugin.warpskiller.Skills.Herblore;
+import net.warp.plugin.warpskiller.Skills.SkillTask;
 
 @ConfigGroup("warpskiller")
 public interface WarpSkillerConfig extends Config {
@@ -86,7 +89,14 @@ public interface WarpSkillerConfig extends Config {
     )
     default Gems gemType() { return Gems.SAPPHIRE; }
 
-
+    @ConfigItem(
+            keyName = "amethystType",
+            name = "Cut Amethyst: ",
+            description = "What to cut",
+            position = 3,
+            section = crafting
+    )
+    default Amethyst amethystType() { return Amethyst.DART_TIPS; }
 
     @ConfigItem(
             keyName = "spellType",
@@ -114,6 +124,15 @@ public interface WarpSkillerConfig extends Config {
             section = magic
     )
     default Bars barType() {return Bars.IRON; }
+
+    @ConfigItem(
+            keyName = "pickupGlass",
+            name = "Pickup glass",
+            description = "Pickup dropped glass",
+            position = 3,
+            section = magic
+    )
+    default boolean pickupGlass() {return false; }
 
     @ConfigItem(
             keyName = "bowType",

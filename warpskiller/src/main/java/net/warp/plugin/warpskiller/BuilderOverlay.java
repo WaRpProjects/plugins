@@ -60,11 +60,11 @@ class BuilderOverlay extends Overlay
     private void renderStats(Graphics2D graphics){
 
         int secondsRunning=(int)(System.currentTimeMillis()-plugin.startTime)/1000;
-        String mainText = "Warp Skiller V0.1.2";
+        String mainText = "Warp Skiller V0.1.5";
         String taskString = "Current task: " + plugin.config.skillTask().getTaskName();
         String runtimeString="Runtime: "+getRuntimeString(secondsRunning);
         String statusString="Status: "+plugin.status.getStatus();
-        String moneyMadeString = "Alch profit: " + plugin.alchProfit;
+
 
         Rectangle slotBounds;
         double hoursAsDouble=(double) secondsRunning/3600.0;
@@ -73,12 +73,11 @@ class BuilderOverlay extends Overlay
         int herbloreGained = (Skills.getExperience(Skill.HERBLORE) - plugin.herbloreExp);
         int fletchingGained = (Skills.getExperience(Skill.FLETCHING) - plugin.fletchExp);
 
+        String moneyMadeString = "Profit: " + plugin.profit + " (" + (int) (plugin.profit / hoursAsDouble / 1000) + "k/hr)";
         String craftString =  "Crafting exp: " + craftGained + " (" + (int) (craftGained / hoursAsDouble / 1000) + "k/hr)";
         String magicString = "Magic exp: "  + magicGained + " (" + (int) (magicGained / hoursAsDouble / 1000) + "k/hr)";
         String herbloreString = "Herblore exp: "  + herbloreGained + " (" + (int) (herbloreGained / hoursAsDouble / 1000) + "k/hr)";
         String fletchingString = "Fletching exp: "  + fletchingGained + " (" + (int) (fletchingGained / hoursAsDouble / 1000) + "k/hr)";
-
-
 
         List<Widget> chatboxRoot = Widgets.get(162);
         Widget box = chatboxRoot.get(34);
@@ -86,7 +85,7 @@ class BuilderOverlay extends Overlay
             slotBounds = box.getBounds();
             Point mouse = plugin.client.getCanvas().getMousePosition();
             graphics.setColor(new Color(0, 0, 0, 255));
-            //Makes paint transparent if mouse hovers it
+
             if(mouse!=null) {
                 if (slotBounds.contains(mouse)){
                     graphics.setColor(new Color(0, 0, 0, 125));
@@ -128,15 +127,12 @@ class BuilderOverlay extends Overlay
         graphics.setColor(YELLOW);
         graphics.drawString(statusString, textX, textY);
 
-        if (plugin.alchProfit > 0)
-        {
             textX += 0;
             textY += 20;
             graphics.setColor(Color.BLACK);
             graphics.drawString(moneyMadeString, textX + 1, textY + 1);
             graphics.setColor(YELLOW);
             graphics.drawString(moneyMadeString, textX, textY);
-        }
 
         textX = 270;
         textY = 370;

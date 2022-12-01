@@ -112,7 +112,8 @@ public class WarpMasterThieverPlugin extends LoopedPlugin {
             {
                 log.debug("Closing bank");
                 Bank.close();
-                return -2;
+                Time.sleepUntil(() -> !Bank.isOpen(), -2);
+                return -1;
             }
         }
 
@@ -125,7 +126,7 @@ public class WarpMasterThieverPlugin extends LoopedPlugin {
                 return -1;
             }
 
-            if (!Bank.isOpen()) {
+            if (!Bank.isOpen() && bank != null) {
                 log.debug("Click bank");
                 bank.interact("Bank");
                 Time.sleepUntil(Bank::isOpen, -2);

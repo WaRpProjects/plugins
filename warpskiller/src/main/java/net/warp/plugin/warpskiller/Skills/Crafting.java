@@ -1,11 +1,12 @@
-package net.warp.plugin.warpskiller.Items;
+package net.warp.plugin.warpskiller.Skills;
 
 import lombok.Getter;
 
 @Getter
 public enum Crafting {
     GEMCUTTING("Gem cutting"),
-    GLASSBLOW("Blow glass");
+    GLASSBLOW("Blow glass"),
+    AMETHYST("Amethyst");
 
     private final String craftName;
 

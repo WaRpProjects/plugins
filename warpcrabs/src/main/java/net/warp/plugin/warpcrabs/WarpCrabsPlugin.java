@@ -106,17 +106,17 @@ public class WarpCrabsPlugin extends LoopedPlugin {
             {
                 log.debug("Walking to get agro again.");
                 Movement.walkTo(walkLocation);
-                return -2;
+                return -1;
             }
             timerRunning = false;
-            return -2;
+            return -1;
         }
 
         if (!timerRunning && local.getWorldLocation().distanceTo(config.location().getLocationPoint()) != 0 && !getAmmo)
         {
             log.debug("Moving to: " + config.location().getLocationName());
             Movement.walkTo(config.location().getLocationPoint());
-            return -2;
+            return -1;
         }
 
         if (config.getAmmo() && local.isIdle())
@@ -129,7 +129,7 @@ public class WarpCrabsPlugin extends LoopedPlugin {
                 ammo.pickup();
                 Time.sleep(300);
                 getAmmo = false;
-                return -2;
+                return -1;
             }
 
             Item ammoEquip = Inventory.getFirst(config.ammoName());
@@ -137,9 +137,9 @@ public class WarpCrabsPlugin extends LoopedPlugin {
             {
                 log.debug("Equipping ammo");
                 ammoEquip.interact("Wield");
-                return -2;
+                return -1;
             }
         }
-        return -2;
+        return -1;
     }
 }

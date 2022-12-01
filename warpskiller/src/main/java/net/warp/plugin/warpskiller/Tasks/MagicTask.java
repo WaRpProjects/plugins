@@ -5,17 +5,17 @@ import net.runelite.api.Item;
 import net.runelite.api.ItemComposition;
 import net.unethicalite.api.game.Prices;
 import net.unethicalite.api.items.Equipment;
-import net.unethicalite.api.items.GrandExchange;
 import net.unethicalite.api.items.Inventory;
 import net.unethicalite.api.magic.Magic;
 import net.unethicalite.api.plugins.Task;
-import net.warp.plugin.warpskiller.Items.SkillTask;
+import net.warp.plugin.warpskiller.Skills.SkillTask;
+import net.warp.plugin.warpskiller.Items.Spells;
 import net.warp.plugin.warpskiller.PluginStatus;
 import net.warp.plugin.warpskiller.WarpSkillerPlugin;
 
 @Slf4j
-public class MagicTask implements Task {
-
+public class MagicTask implements Task
+{
     public MagicTask(WarpSkillerPlugin plugin)
     {
         this.plugin = plugin;
@@ -27,12 +27,16 @@ public class MagicTask implements Task {
             return plugin.config.skillTask() == SkillTask.MAGIC;
     }
     private boolean needPrice = true;
-    private int alchMoney;
-    private int buyPrice;
-    @Override
-    public int execute() {
-        log.debug("MagicTask started");
+    private final int plankID = 8782;
+    private final int logID = 6332;
+    private int rune1Price = 0;
+    private int rune2Price = 0;
+    private int item1Price = 0;
+    private int item2Price = 0;
 
+    @Override
+    public int execute()
+    {
         if (needItems())
         {
             log.debug("We need items");
@@ -40,47 +44,43 @@ public class MagicTask implements Task {
             return -1;
         }
 
-        if (!staffEquipped() && Inventory.contains(12000, 1387))
+        if (!staffEquipped() && Inventory.contains(plugin.staffID))
         {
-            Inventory.getFirst(12000, 1387).interact("Wield");
+            Inventory.getFirst(plugin.staffID).interact("Wield");
             return -1;
         }
 
         switch(plugin.config.spellType())
         {
+            case SUPERHEAT_GLASS:
+                plugin.status = PluginStatus.GLASS_MAKE;
+                Magic.cast(plugin.config.spellType().getSpellType());
+                calculateProfit();
+                return -4;
+
             case PLANK_MAKE:
-                if (Inventory.contains(995) && Inventory.contains("Mahogany logs"))
+                if (Inventory.contains(995) && Inventory.contains(logID))
                 {
                     plugin.status = PluginStatus.PLANK_MAKE;
-                    Magic.cast(plugin.config.spellType().getSpellType(), Inventory.getFirst("Mahogany logs"));
+                    Magic.cast(plugin.config.spellType().getSpellType(), Inventory.getFirst(logID));
+                    calculateProfit();
                     return -3;
                 }
                 break;
-
             case LOW_ALCH:
             case HIGH_ALCH:
                 plugin.status = PluginStatus.ALCH;
-                if (Inventory.contains(plugin.config.alchItem()) && Inventory.contains("Nature rune"))
+                if (Inventory.contains(plugin.config.alchItem()) && Inventory.contains(plugin.rune1))
                 {
-                    if (needPrice)
-                    {
-                        Item natureRune = Inventory.getFirst("Nature rune");
-                        Item alchItem = Inventory.getFirst(plugin.config.alchItem());
-                        buyPrice += getPrice(natureRune.getId());
-                        buyPrice += getPrice(alchItem.getId());
-                        ItemComposition temp = alchItem.getComposition();
-                        alchMoney = temp.getHaPrice();
-                        needPrice = false;
-                    }
                     Magic.cast(plugin.config.spellType().getSpellType(), Inventory.getFirst(plugin.config.alchItem()));
-                    plugin.alchProfit += alchMoney - buyPrice;
+                    calculateProfit();
                     return -4;
                 }
-
                 break;
+
             case SUPERHEAT:
                 plugin.status = PluginStatus.SUPERHEAT;
-                if (Inventory.contains(plugin.config.barType().getOres()) && Inventory.contains("Nature rune"))
+                if (Inventory.contains(plugin.config.barType().getOres()) && Inventory.contains(plugin.rune1))
                 {
                     Magic.cast(plugin.config.spellType().getSpellType(), Inventory.getFirst(plugin.config.barType().getOres()));
                     return -3;
@@ -89,18 +89,23 @@ public class MagicTask implements Task {
         }
         return -1;
     }
-    private boolean staffEquipped() { return Equipment.contains(12000, 1387); }
+    private boolean staffEquipped()
+    {
+        return Equipment.contains(plugin.staffID);
+    }
     private boolean needItems ()
     {
         switch (plugin.config.spellType())
         {
+            case SUPERHEAT_GLASS:
+                return !Inventory.contains("Bucket of sand") || !Inventory.contains("Giant seaweed");
             case PLANK_MAKE:
-                return !Inventory.contains(995) || !Inventory.contains("Mahogany logs");
+                return !Inventory.contains(995) || !Inventory.contains(logID);
             case HIGH_ALCH:
             case LOW_ALCH:
-                return !Inventory.contains("Nature rune") || !Inventory.contains(plugin.config.alchItem());
+                return !Inventory.contains(plugin.rune1) || !Inventory.contains(plugin.config.alchItem());
             case SUPERHEAT:
-                return !Inventory.contains("Nature rune") || !Inventory.contains(plugin.config.barType().getOres());
+                return !Inventory.contains(plugin.rune1) || !Inventory.contains(plugin.config.barType().getOres());
             default:
                 return true;
         }
@@ -108,6 +113,59 @@ public class MagicTask implements Task {
 
     private int getPrice(int itemID)
     {
+        if (itemID == 0) return 0;
         return Prices.getItemPrice(itemID);
+    }
+
+    private void calculateProfit()
+    {
+        if (needPrice)
+        {
+            item1Price = 0;
+            item2Price = 0;
+            rune1Price = 0;
+            rune2Price = 0;
+            log.debug("Getting item prices");
+            switch (plugin.config.spellType())
+            {
+                case SUPERHEAT_GLASS:
+                    int temp = getPrice(1783);
+                    item1Price = getPrice(1775);
+                    item2Price = getPrice(21504);
+                    rune1Price = getPrice(9075);
+                    item2Price = item2Price * 3;
+                    item2Price += temp * 18;
+
+                    needPrice = false;
+                    return;
+                case PLANK_MAKE:
+                    item1Price = getPrice(plankID);
+                    item2Price = getPrice(logID) + 1050;
+                    rune1Price = getPrice(plugin.rune1);
+                    rune2Price = getPrice(plugin.rune2);
+                    rune2Price += rune2Price;
+                    needPrice = false;
+                    return;
+
+                case HIGH_ALCH:
+                    Item alchItem = Inventory.getFirst(plugin.config.alchItem());
+                    ItemComposition alchPrice = alchItem.getComposition();
+                    item1Price = alchPrice.getHaPrice();
+                    item2Price = getPrice(alchItem.getId());
+                    rune1Price = getPrice(plugin.rune1);
+                    rune2Price = getPrice(plugin.rune2);
+                    needPrice = false;
+                    return;
+            }
+        }
+        int cost = item2Price + rune1Price + rune2Price;
+        if (plugin.config.spellType() == Spells.SUPERHEAT_GLASS)
+        {
+            if (Inventory.contains("Molten glass"))
+            {
+                item1Price = item1Price * Inventory.getCount("Molten glass");
+            }
+        }
+        plugin.profit +=  item1Price - cost;
     }
 }

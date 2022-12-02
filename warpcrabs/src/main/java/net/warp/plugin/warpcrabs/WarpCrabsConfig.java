@@ -10,7 +10,7 @@ public interface WarpCrabsConfig extends Config
             description = "Settings",
             position = 0
     )
-    String general = "Location";
+    String location = "Location";
 
     @ConfigSection(
             name = "Food",
@@ -34,11 +34,29 @@ public interface WarpCrabsConfig extends Config
     String ammo = "Ammo";
 
     @ConfigItem(
+            keyName = "useCustomLocation",
+            name = "Custom Location",
+            description = "Wanna use you own location?",
+            position = 0,
+            section = location
+    )
+    default boolean useCustomLocation() { return false; }
+
+    @ConfigItem(
+            keyName = "customLocation",
+            name = "Custom Location",
+            description = "Wanna use you own location?",
+            position = 1,
+            section = location
+    )
+    default String customLocation() { return "0 0 0"; }
+
+    @ConfigItem(
             keyName = "location",
             name = "Location",
             description = "What location",
-            position = 0,
-            section = general
+            position = 2,
+            section = location
     )
     default Locations location() { return Locations.SPOT_1; }
 

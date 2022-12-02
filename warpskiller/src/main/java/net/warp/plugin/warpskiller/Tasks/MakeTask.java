@@ -10,6 +10,9 @@ import net.unethicalite.api.widgets.Production;
 import net.unethicalite.api.widgets.Widgets;
 import net.warp.plugin.warpskiller.Items.Bows;
 import net.warp.plugin.warpskiller.Items.Logs;
+import net.warp.plugin.warpskiller.PluginStatus;
+import net.warp.plugin.warpskiller.Skills.Herblore;
+import net.warp.plugin.warpskiller.Skills.SkillTask;
 import net.warp.plugin.warpskiller.WarpSkillerPlugin;
 
 @Slf4j
@@ -29,6 +32,8 @@ public class MakeTask implements Task {
 
     @Override
     public int execute() {
+
+        plugin.status = getStatus();
 
         if (!Inventory.contains(plugin.item1) || !Inventory.contains(plugin.item2))
         {
@@ -89,5 +94,30 @@ public class MakeTask implements Task {
                 return Widgets.get(270,14);
         }
         return null;
+    }
+
+
+    private PluginStatus getStatus ()
+    {
+        switch (plugin.config.craftTask())
+        {
+            case AMETHYST:
+                return PluginStatus.AMETHYST;
+            case GLASSBLOW:
+                return PluginStatus.GLASSBLOW;
+            case GEMCUTTING:
+                return PluginStatus.GEMCUTTING;
+        }
+
+        if (plugin.config.herbloreType() == Herblore.POTION)
+        {
+            return PluginStatus.POTIONMAKING;
+        }
+
+        if (plugin.config.skillTask() == SkillTask.FLETCH)
+        {
+            return PluginStatus.FLETCHBOWS;
+        }
+        return PluginStatus.IDLE;
     }
 }

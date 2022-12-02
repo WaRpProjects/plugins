@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.Item;
 import net.unethicalite.api.items.Inventory;
 import net.unethicalite.api.plugins.Task;
+import net.warp.plugin.warpskiller.PluginStatus;
 import net.warp.plugin.warpskiller.Skills.Herblore;
 import net.warp.plugin.warpskiller.Skills.SkillTask;
 import net.warp.plugin.warpskiller.WarpSkillerPlugin;
@@ -24,6 +25,8 @@ public class GrimyHerbTask implements Task
     @Override
     public int execute()
     {
+        plugin.status = PluginStatus.CLEANHERBS;
+
         if (!Inventory.contains(x -> x.getName().contains(plugin.item1)))
         {
             log.debug("Need more Grimy herbs");
